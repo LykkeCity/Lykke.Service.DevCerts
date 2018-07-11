@@ -1,0 +1,59 @@
+﻿@using Lykke.Service.DevCerts.Models
+@using Newtonsoft.Json
+@model UsersModel
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<br />
+<br />
+<div class="editItems">
+
+</div>
+
+@section Scripts
+    {
+<script type="text/javascript">
+        $(function () {
+            $.generateTable = function (json) {
+                var list = eval('( ' + json + ')');
+                var html =
+                    '<table class="table table-stripped table-bordered"><tr><th>Email</th><th>Password</th><th>Date</th><th>Revoked</th><th>Actions</th></tr>';
+                for (var i = 0; i < list.length; i++) {
+                    var elem = list[i];
+                    html += '<tr> ' +
+                        '<td class="col-md-2"><span class="viewMode">' + elem.Email + '</span></td>' +
+                        '<td class="col-md-2"><span class="viewMode">' + '<div id="wrapper"><div class="form-group has-feedback"><input type="text" value="' + elem.CertPassword + '" class="form-control pass" id="password" placeholder="******" readonly><i class="glyphicon glyphicon-eye-open form-control-feedback"></i></div></div>'  + '</span></td>' +
+                        '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
+                        '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
+                        '<td class="col-md-2" class="viewMode" >' + '<a href="javascript:;" class="btn  btn-md btn-default revert">Download</a>' + '<span>&nbsp;&nbsp;</span>' +
+                        (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default revert">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default revert">Revoke</a>') +
+                        '</td>' +
+                        '</tr>';
+                    html += '</table>';
+                    var parent = $('.editItems');
+                    parent.empty();
+                    parent.append($(html));
+                }
+                $('#password + .glyphicon').on('click', function () {
+                    console.log('sss');
+                    $(this).toggleClass('glyphicon-eye-close').toggleClass('glyphicon-eye-open'); // toggle our classes for the eye icon
+                    $('#password').togglePassword(); // activate the hideShowPassword plugin
+                });
+                $('.pass').click(function () {
+                    var x = $(this);
+                    console.log(x.attr.type);
+                    if (x.type == "password") {
+                        x.type = "text";
+
+                    } else {
+                        x.type = "password";
+                    }
+                });
+            }
+
+            
+            $.generateTable('@Html.Raw(JsonConvert.SerializeObject(Model.Users).Replace("'", "\\'").Replace("\"", "\\\""))');
+        });
+</script>
+}

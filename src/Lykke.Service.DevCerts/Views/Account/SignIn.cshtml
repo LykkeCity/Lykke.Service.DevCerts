@@ -1,0 +1,50 @@
+﻿@using Lykke.Service.DevCerts.Models
+@model SignInModel
+
+@section Header
+    {
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="@Model.GoogleApiClientId">
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-fetch_basic_profile" content="false">
+}
+
+<div class="signInView col-md-12">
+    <h2>Sign in</h2>
+    @if (true.Equals(ViewData["usersEmpty"]))
+    {
+    <h3 class="info">You don't have users to manage the settings</h3>
+    }
+    @using (Html.BeginForm())
+    {
+    <input type="hidden" id="returnUrl" value="@ViewData["returnUrl"]">
+    <br />
+    <div class="g-signin2" data-onsuccess="googleSignIn" data-theme="dark" data-prompt="select_account"></div>  
+
+    }
+</div>
+
+
+
+
+@section Scripts
+    {
+    <script type="text/javascript">
+        
+        function googleSignIn(googleUser) {
+
+            var idToken = googleUser.getAuthResponse().id_token;
+            $.post('@Url.Action("Authenticate")',
+                {
+                    googleSignInIdToken: idToken,
+                    returnUrl: $('#returnUrl').val()
+                }, function(data) {
+                    if (data) {
+                        location.href = data;
+                    }
+                });
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.disconnect();
+        }
+    </script>
+}
