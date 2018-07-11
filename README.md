@@ -1,2 +1,2 @@
 # Lykke.Service.DevCerts
-Create sertificates
+Create certificates
