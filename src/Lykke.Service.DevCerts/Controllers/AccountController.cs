@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -155,12 +156,10 @@ namespace Lykke.Service.DevCerts.Controllers
             {
                 //var home = "pwd".Bash();
                 //var filePath = home[5] + ":\\" + home.Substring(7, home.Length - 8).Replace("/", "\\");
-                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, _appSettings.DevCertsService.PathToScriptFolder.Replace("/", "\\")); ;
-                filePath = Path.Combine(filePath, creds + ".p12");
-                Console.WriteLine(filePath);
+
                 byte[] file;
 
-                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                using (FileStream stream = new FileStream(_appSettings.DevCertsService.PathToScriptFolder, FileMode.Open, FileAccess.Read))
                 {
                     using (var reader = new BinaryReader(stream))
                     {
