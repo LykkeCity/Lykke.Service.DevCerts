@@ -48,6 +48,9 @@ namespace Lykke.Service.DevCerts
         [UsedImplicitly]
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            var appSettings = Configuration.Get<AppSettings>();
+
+            var _settings = ConstantReloadingManager.From(appSettings);
 
             services.AddAuthentication(opts =>
             {
@@ -59,7 +62,7 @@ namespace Lykke.Service.DevCerts
 
                     {
                         o.LoginPath = new PathString("/Account/SignIn");
-                        o.ExpireTimeSpan = TimeSpan.FromMinutes(int.Parse(Configuration["DevCertsService:UserLoginTime"]));
+                        o.ExpireTimeSpan = TimeSpan.FromMinutes(60);
                     });
 
             services.AddAuthorization(options =>
@@ -70,9 +73,7 @@ namespace Lykke.Service.DevCerts
             services.AddMvc();
 
             var builder = new ContainerBuilder();
-            var appSettings = Configuration.Get<AppSettings>();
 
-            var _settings = ConstantReloadingManager.From(appSettings);
             builder.RegisterModule(new DbModule(_settings));
             builder.Populate(services);
 

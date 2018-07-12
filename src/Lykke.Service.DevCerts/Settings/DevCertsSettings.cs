@@ -11,5 +11,6 @@ namespace Lykke.Service.DevCerts.Settings
         public string AvailableEmailsRegex { get; set; }
         public string PathToScriptFolder { get; set; }
         public string ScriptName { get; set; }
+        public int UserLoginTime { get; set; }
     }
 }
