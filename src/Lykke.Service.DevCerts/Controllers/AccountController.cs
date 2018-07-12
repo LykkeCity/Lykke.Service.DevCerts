@@ -7,6 +7,7 @@ using Lykke.Service.DevCerts.Settings;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace Lykke.Service.DevCerts.Controllers
         private readonly AppSettings _appSettings;
         private readonly IUserRepository _userRepository;
         private readonly IBlobDataRepository _blobDataRepository;
+        private readonly IHostingEnvironment _hostingEnvironment;
 
         private string ApiClientId { get; }
         private string AvailableEmailsRegex { get; }
@@ -33,12 +35,14 @@ namespace Lykke.Service.DevCerts.Controllers
             AppSettings appSettings,
             IUserRepository userRepository,
             IBlobDataRepository blobDataRepository,
-            IUserActionHistoryRepository userActionHistoryRepository
+            IUserActionHistoryRepository userActionHistoryRepository,
+            IHostingEnvironment hostingEnvironment
             ) : base(userActionHistoryRepository)
         {
             _appSettings = appSettings;
             _userRepository = userRepository;
             _blobDataRepository = blobDataRepository;
+            _hostingEnvironment = hostingEnvironment;
 
             ApiClientId = _appSettings.DevCertsService.ApiClientId;
             AvailableEmailsRegex = _appSettings.DevCertsService.AvailableEmailsRegex;
@@ -149,13 +153,9 @@ namespace Lykke.Service.DevCerts.Controllers
         {
             try
             {
-                var home = "pwd".Bash();
+                //var home = "pwd".Bash();
                 //var filePath = home[5] + ":\\" + home.Substring(7, home.Length - 8).Replace("/", "\\");
-                var filePath = "";
-                if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
-                {
-                    filePath += _appSettings.DevCertsService.PathToScriptFolder.Replace("/", "\\") + "\\";
-                }
+                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, _appSettings.DevCertsService.PathToScriptFolder.Replace("/", "\\")); ;
                 filePath = Path.Combine(filePath, creds + ".p12");
                 Console.WriteLine(filePath);
                 byte[] file;
