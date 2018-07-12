@@ -10,18 +10,29 @@ namespace Lykke.Service.DevCerts.Code
             var escapedArgs = cmd.Replace("\\", "");
             Console.WriteLine(escapedArgs);
             string result = "";
-            using (Process proc = new Process())
+            try
             {
-                proc.StartInfo.FileName = "/bin/bash";
-                proc.StartInfo.Arguments = "-c \" " + escapedArgs + " \"";
-                proc.StartInfo.UseShellExecute = true;
-                proc.StartInfo.RedirectStandardOutput = true;
-                proc.StartInfo.RedirectStandardError = true;
-                proc.Start();
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo.FileName = "/bin/bash";
+                    proc.StartInfo.Arguments = escapedArgs;
+                    proc.StartInfo.UseShellExecute = false;
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.Start();
 
-                result += proc.StandardOutput.ReadLine();
-                result += proc.StandardError.ReadLine();
+                    result += proc.StandardOutput.ReadToEnd();
+                    result += proc.StandardError.ReadToEnd();
+
+                    proc.WaitForExit();
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+
             Console.WriteLine(result);
             return result;
         }
