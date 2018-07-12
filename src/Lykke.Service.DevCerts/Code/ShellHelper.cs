@@ -12,7 +12,7 @@ namespace Lykke.Service.DevCerts.Code
             string result = "";
             using (Process proc = new Process())
             {
-                proc.StartInfo.FileName = "bash";
+                proc.StartInfo.FileName = "/bin/bash";
                 proc.StartInfo.Arguments = "-c \" " + escapedArgs + " \"";
                 proc.StartInfo.UseShellExecute = false;
                 proc.StartInfo.RedirectStandardOutput = true;
