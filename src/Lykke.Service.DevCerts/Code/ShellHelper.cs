@@ -21,8 +21,6 @@ namespace Lykke.Service.DevCerts.Code
 
                 result += proc.StandardOutput.ReadLine();
                 result += proc.StandardError.ReadLine();
-
-                proc.WaitForExit();
             }
             Console.WriteLine(result);
             return result;
