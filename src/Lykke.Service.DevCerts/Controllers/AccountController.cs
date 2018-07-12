@@ -157,7 +157,7 @@ namespace Lykke.Service.DevCerts.Controllers
                 var filePath = home[5] + ":\\" + home.Substring(7, home.Length - 8).Replace("/", "\\");
                 if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
                 {
-                    filePath += "\\" +_appSettings.DevCertsService.PathToScriptFolder.Replace("/", "\\") + "\\";
+                    filePath +=_appSettings.DevCertsService.PathToScriptFolder.Replace("/", "\\") + "\\";
                 }
                 filePath = Path.Combine(filePath, creds + ".p12");
                 Console.WriteLine(filePath);

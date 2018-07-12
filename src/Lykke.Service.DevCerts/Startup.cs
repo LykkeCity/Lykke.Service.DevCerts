@@ -22,6 +22,7 @@ using Lykke.Common.Log;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Lykke.Service.DevCerts
 {
@@ -69,6 +70,10 @@ namespace Lykke.Service.DevCerts
             {
                 options.DefaultPolicy = new AuthorizationPolicyBuilder(CookieAuthenticationDefaults.AuthenticationScheme).RequireAuthenticatedUser().Build();
             });
+
+            services.AddDataProtection()
+                .SetApplicationName("devcerts")
+                .PersistKeysToFileSystem(new System.IO.DirectoryInfo(@"/var/dpkeys/"));
 
             services.AddMvc();
 
