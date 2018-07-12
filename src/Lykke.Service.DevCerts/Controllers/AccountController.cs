@@ -1,21 +1,19 @@
-﻿using Lykke.Service.DevCerts.Models;
+﻿using Lykke.Service.DevCerts.AzureRepositories.User;
+using Lykke.Service.DevCerts.Code;
+using Lykke.Service.DevCerts.Core.Blob;
+using Lykke.Service.DevCerts.Core.User;
+using Lykke.Service.DevCerts.Models;
 using Lykke.Service.DevCerts.Settings;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Lykke.Service.DevCerts.AzureRepositories.User;
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Authentication;
-using Lykke.Service.DevCerts.Code;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Security.Claims;
-using Lykke.Service.DevCerts.Extensions;
-using Lykke.Service.DevCerts.Core.User;
 using System.IO;
-using Lykke.Service.DevCerts.Core.Blob;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Lykke.Service.DevCerts.Controllers
 {
@@ -120,13 +118,11 @@ namespace Lykke.Service.DevCerts.Controllers
 
                 return Content(ex.ToString());
             }
-
-            return Content(string.Empty);
         }
 
         private async Task GenerateCertAsync(IUserEntity user)
         {
-            var creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            var creds = user.Email;
             Console.WriteLine(creds);
 
             var shell = "";
@@ -154,10 +150,11 @@ namespace Lykke.Service.DevCerts.Controllers
             try
             {
                 var home = "pwd".Bash();
-                var filePath = home[5] + ":\\" + home.Substring(7, home.Length - 8).Replace("/", "\\");
+                //var filePath = home[5] + ":\\" + home.Substring(7, home.Length - 8).Replace("/", "\\");
+                var filePath = "";
                 if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
                 {
-                    filePath +=_appSettings.DevCertsService.PathToScriptFolder.Replace("/", "\\") + "\\";
+                    filePath += _appSettings.DevCertsService.PathToScriptFolder.Replace("/", "\\") + "\\";
                 }
                 filePath = Path.Combine(filePath, creds + ".p12");
                 Console.WriteLine(filePath);

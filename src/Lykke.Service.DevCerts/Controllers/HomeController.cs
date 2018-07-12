@@ -61,7 +61,7 @@ namespace Lykke.Service.DevCerts.Controllers
         {
             try
             {
-                var fileName = HttpContext.User.Identity.Name.Substring(0, HttpContext.User.Identity.Name.IndexOf('@')) + ".p12";
+                var fileName = HttpContext.User.Identity.Name + ".p12";
                 var blob = await _blobDataRepository.GetDataAsync(fileName);
                 Stream blobStream = blob.AsStream();
                 //HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.OK);
