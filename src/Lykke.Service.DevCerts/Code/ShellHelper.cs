@@ -19,8 +19,8 @@ namespace Lykke.Service.DevCerts.Code
                 proc.StartInfo.RedirectStandardError = true;
                 proc.Start();
 
-                result += proc.StandardOutput.ReadToEnd();
-                result += proc.StandardError.ReadToEnd();
+                result += proc.StandardOutput.ReadLine();
+                result += proc.StandardError.ReadLine();
 
                 proc.WaitForExit();
             }
