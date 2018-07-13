@@ -157,9 +157,11 @@ namespace Lykke.Service.DevCerts.Controllers
                 //var home = "pwd".Bash();
                 //var filePath = home[5] + ":\\" + home.Substring(7, home.Length - 8).Replace("/", "\\");
 
+                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+
                 byte[] file;
 
-                using (FileStream stream = new FileStream(_appSettings.DevCertsService.PathToScriptFolder, FileMode.Open, FileAccess.Read))
+                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     using (var reader = new BinaryReader(stream))
                     {
