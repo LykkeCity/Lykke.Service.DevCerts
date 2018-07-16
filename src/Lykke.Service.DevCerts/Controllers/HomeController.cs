@@ -170,12 +170,12 @@ namespace Lykke.Service.DevCerts.Controllers
                          {
                              RowKey = uc.RowKey,
                              Email = uc.Email,
-                             CertDate = uc.CertDate ?? DateTime.MinValue,
+                             CertDate = (uc.CertDate ?? DateTime.MinValue).ToString("G"),
                              CertIsRevoked = uc.CertIsRevoked ?? false,
                              Admin = uc.Admin ?? false,
                              CertPassword = Crypto.DecryptStringAES(uc.CertPassword, _appSettings.DevCertsService.EncryptionPass),
                              HasCert = uc.HasCert ?? false,
-                             RevokeDate = uc.RevokeDate ?? DateTime.MinValue,
+                             RevokeDate = (uc.RevokeDate ?? DateTime.MinValue).ToString("G"),
                          }).ToList();
 
             users.OrderBy(u => u.Email);
