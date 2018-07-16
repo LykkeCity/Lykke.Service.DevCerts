@@ -25,6 +25,12 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="cert\**" />
+    <EmbeddedResource Remove="cert\**" />
+    <None Remove="cert\**" />
+  </ItemGroup>
+
    
   <ItemGroup>
     <None Update="wwwroot\**\*;Views\**\*;Areas\**\Views;Dockerfile">

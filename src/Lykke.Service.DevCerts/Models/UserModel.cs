@@ -4,6 +4,7 @@ namespace Lykke.Service.DevCerts.Models
 {
     public class UserModel
     {
+        public string RowKey { get; set; }
         public string Email { get; set; }
         public string CertPassword { get; set; }
         public DateTime CertDate { get; set; }

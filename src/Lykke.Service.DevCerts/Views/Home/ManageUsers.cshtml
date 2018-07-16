@@ -21,38 +21,79 @@
                     '<table class="table table-stripped table-bordered"><tr><th>Email</th><th>Password</th><th>Date</th><th>Revoked</th><th>Actions</th></tr>';
                 for (var i = 0; i < list.length; i++) {
                     var elem = list[i];
-                    html += '<tr> ' +
-                        '<td class="col-md-2"><span class="viewMode">' + elem.Email + '</span></td>' +
-                        '<td class="col-md-2"><span class="viewMode">' + '<div id="wrapper"><div class="form-group has-feedback"><input type="text" value="' + elem.CertPassword + '" class="form-control pass" id="password" placeholder="******" readonly><i class="glyphicon glyphicon-eye-open form-control-feedback"></i></div></div>'  + '</span></td>' +
+                    html += '<tr elemId="' + elem.RowKey + '"> ' +
+                        '<td class="col-md-2"><span class="viewMode" class = "name-cert" >' + elem.Email + '</span></td>' +
+                        '<td class="col-md-2"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == false ? 'password' :'text') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'No Password' : elem.CertPassword) + '"><span class="input-group-btn"><button class="btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button></span></div>'  + '</span></td>' +
                         '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
                         '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
-                        '<td class="col-md-2" class="viewMode" >' + '<a href="javascript:;" class="btn  btn-md btn-default revert">Download</a>' + '<span>&nbsp;&nbsp;</span>' +
-                        (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default revert">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default revert">Revoke</a>') +
+                        '<td class="col-md-3" class="viewMode" >' + 
+                        (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default generate">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default download">Download</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default revoke">Revoke</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default change-pass">New pass</a>') +
                         '</td>' +
                         '</tr>';
-                    html += '</table>';
-                    var parent = $('.editItems');
-                    parent.empty();
-                    parent.append($(html));
-                }
-                $('#password + .glyphicon').on('click', function () {
-                    console.log('sss');
-                    $(this).toggleClass('glyphicon-eye-close').toggleClass('glyphicon-eye-open'); // toggle our classes for the eye icon
-                    $('#password').togglePassword(); // activate the hideShowPassword plugin
-                });
-                $('.pass').click(function () {
-                    var x = $(this);
-                    console.log(x.attr.type);
-                    if (x.type == "password") {
-                        x.type = "text";
 
+                }
+                html += '</table>';
+                var parent = $('.editItems');
+                parent.empty();
+                parent.append($(html));
+
+                $(".reveal").on('click', function () {
+                    var $pwd = $(this).parents('div').children('input');
+                    if ($pwd.attr('type') === 'password') {
+                        $pwd.attr('type', 'text');
                     } else {
-                        x.type = "password";
+                        $pwd.attr('type', 'password');
+                    }
+                });
+
+                $('.download').click(function () {
+                    var elemId = $(this).parents('tr').attr('elemId');
+
+                    var url = '@this.Url.Action("GetCertificates", "Home")' + '/'+ elemId;
+                    window.open(url, "_blank");
+                });
+
+                $('.revoke').click(function () {
+                    var elemId = $(this).parents('tr').attr('elemId');
+
+                    if (confirm('Certificate will be revoked.')) {
+                        var url = '@this.Url.Action("RevokeCert", "Home")' + '/' + elemId;
+
+                        $.post(url, elemId, function (data) {
+                            window.alert('Certificate revoked.');
+                            $.generateTable(data.Json);
+                        });
+                    }
+                });
+
+                $('.change-pass').click(function () {
+                    var elemId = $(this).parents('tr').attr('elemId');
+
+                    if (confirm('Password will be changed.')) {
+                        var url = '@this.Url.Action("ChangePass", "Home")' + '/' + elemId;
+
+                        $.post(url, elemId, function (data) {
+                            window.alert('Password changed.');
+                            $.generateTable(data.Json);
+                        });
+                    }
+                });
+
+                $('.generate').click(function () {
+                    var elemId = $(this).parents('tr').attr('elemId');
+
+                    if (confirm('New certificate will be generated.')) {
+                        var url = '@this.Url.Action("GenerateNew", "Home")' + '/' + elemId;
+
+                        $.post(url, elemId, function (data) {
+                            window.alert('New certificate was generated.');
+                            $.generateTable(data.Json);
+                        });
                     }
                 });
             }
 
-            
+
             $.generateTable('@Html.Raw(JsonConvert.SerializeObject(Model.Users).Replace("'", "\\'").Replace("\"", "\\\""))');
         });
 </script>

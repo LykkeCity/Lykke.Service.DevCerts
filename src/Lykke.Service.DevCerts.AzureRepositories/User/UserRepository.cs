@@ -18,16 +18,31 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
 
         public async Task<IUserEntity> GetUserByUserEmail(string userEmail)
         {
-            var pk = UserEntity.GeneratePartitionKey();
-            return await _tableStorage.GetDataAsync(pk, UserEntity.GenerateRowKey(userEmail));
+            var Users = await GetUsers();
+            return Users.Where(u => u.Email == userEmail).OrderByDescending(u => u.CertDate).FirstOrDefault();
+        }
+
+        public async Task<IUserEntity> GetUserByRowKey(string RowKey)
+        {
+            return await _tableStorage.GetDataAsync(UserEntity.GeneratePartitionKey(), RowKey);
         }
 
         public async Task<bool> SaveUser(IUserEntity user)
         {
             try
             {
+
+                var userEntity = await GetUserByUserEmail(user.Email);
                 var te = (UserEntity)user;
-                te.RowKey = UserEntity.GenerateRowKey(te.Email);
+                if (userEntity == null)
+                {
+                    te.RowKey = UserEntity.GenerateRowKey(te.Email);
+                }
+                else
+                {
+                    te.RowKey = userEntity.RowKey;
+                }
+
                 if (te.PartitionKey == null)
                 {
                     te.PartitionKey = UserEntity.GeneratePartitionKey();

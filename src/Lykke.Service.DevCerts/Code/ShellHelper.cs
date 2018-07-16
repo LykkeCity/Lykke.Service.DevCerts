@@ -8,7 +8,6 @@ namespace Lykke.Service.DevCerts.Code
         public static string Bash(this string cmd)
         {
             var escapedArgs = cmd.Replace("\\", "");
-            Console.WriteLine(escapedArgs);
             string result = "";
             try
             {
@@ -31,9 +30,6 @@ namespace Lykke.Service.DevCerts.Code
             {
                 Console.WriteLine(ex);
             }
-
-
-            Console.WriteLine(result);
             return result;
         }
     }

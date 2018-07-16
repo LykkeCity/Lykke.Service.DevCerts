@@ -31,5 +31,7 @@ namespace Lykke.Service.DevCerts.Core.User
         /// <param name="userEmail">userEmail</param>
         /// <returns></returns>
         Task<bool> RemoveUser(string userEmail);
+
+        Task<IUserEntity> GetUserByRowKey(string RowKey);
     }
 }

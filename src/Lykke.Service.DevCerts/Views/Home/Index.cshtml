@@ -6,27 +6,37 @@
 
 
 <div class="row">
-    <div class="col-md-6">
-        <h2>Download certificate</h2>
-        <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download">Download</button>
-    </div>
+    @if (!Model.CertIsRevoked)
+    {
+        <div class="col-md-6">
+            <h2>Download certificate</h2>
+            <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download">Download</button>
+        </div>
 
-    <div class="col-md-6">
-        <h2>Your password</h2>
-        <div class="form-group has-feedback">
-            <div id="wrapper">
-                <div class="col-md-8">
-                    <input type="password" value="@Model.CertPassword" class="form-control" id="password" placeholder="******" readonly>
+        <div class="col-md-6">
+            <h2>Your password</h2>
+            <div class="form-group has-feedback">
+                <div id="wrapper">
+                    <div class="col-md-8">
+                        <input type="password" value="@Model.CertPassword" class="form-control" id="password" placeholder="******" readonly>
+                    </div>
+                    <div class="col-md-4"><button type="button" class="btn btn-primary" id="showPwd" data-toggle="modal">Show password</button></div>
                 </div>
-                <div class="col-md-4"><button type="button" class="btn btn-primary" id="showPwd" data-toggle="modal" >Show password</button></div>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="col-md-6">
+            <h3>Your certificate is revoked. Please, ask in DevOps chat.</h3>
+        </div>      
+    }
+
 </div>
 
-@section Scripts
-    {
-<script type="text/javascript">
+        @section Scripts
+            {
+            <script type="text/javascript">
         $(function () {
             // toggle password visibility
             $('#showPwd').click(function () {
@@ -46,5 +56,5 @@
                 window.open(url, "_blank");
             });
         });
-</script>
-}
+            </script>
+        }

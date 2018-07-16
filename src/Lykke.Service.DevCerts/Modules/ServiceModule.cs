@@ -1,10 +1,11 @@
 ﻿using Autofac;
-using Lykke.Sdk;
+using Lykke.Service.DevCerts.Code;
+using Lykke.Service.DevCerts.Services;
 using Lykke.Service.DevCerts.Settings;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.DevCerts.Modules
-{    
+{
     public class ServiceModule : Module
     {
         private readonly IReloadingManager<AppSettings> _appSettings;
@@ -20,6 +21,10 @@ namespace Lykke.Service.DevCerts.Modules
             builder.RegisterInstance(_appSettings.CurrentValue)
                     .AsSelf()
                     .SingleInstance();
+
+            builder.RegisterType<FilesHelper>()
+                .As<IFilesHelper>()
+                .SingleInstance();
         }
     }
 }

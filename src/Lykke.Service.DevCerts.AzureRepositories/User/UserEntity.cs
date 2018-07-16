@@ -18,8 +18,7 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
 
         public static string GeneratePartitionKey() => "U";
 
-        public static string GenerateRowKey(string userEmail) => userEmail.ToLowerInvariant();
-
+        public static string GenerateRowKey(string userEmail) => Guid.NewGuid().ToString();  
 
         public override void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
         {

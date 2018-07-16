@@ -60,3 +60,4 @@ node_modules
 **/appsettings.json
 **/appsettings.*.json
 **/*sonar*
+/src/Lykke.Service.DevCerts/cert
