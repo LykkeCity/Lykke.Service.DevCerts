@@ -45,7 +45,11 @@ namespace Lykke.Service.DevCerts.Controllers
             await _filesHelper.UpdateDb();
             var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
             Console.WriteLine(HttpContext.User.Identity.Name);
-            return View(new UserModel { Email = user.Email, CertIsRevoked = (bool)user.CertIsRevoked ,CertPassword = Crypto.DecryptStringAES(user.CertPassword, _appSettings.DevCertsService.EncryptionPass) });
+            return View(new UserModel {
+                Email = user.Email,
+                CertIsRevoked = user.CertIsRevoked.HasValue ?  (bool)user.CertIsRevoked : false ,
+                CertPassword = Crypto.DecryptStringAES(user.CertPassword, _appSettings.DevCertsService.EncryptionPass)
+            });
         }
                 
 
