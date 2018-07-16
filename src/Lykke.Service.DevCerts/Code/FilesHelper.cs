@@ -32,7 +32,7 @@ namespace Lykke.Service.DevCerts.Code
         {
             try
             {
-                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db\\index.txt");
+                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db/index.txt");
                 if (LastTimeDbModified < File.GetLastWriteTime(filePath))
                 {                    
                     string lineOfText = "";
