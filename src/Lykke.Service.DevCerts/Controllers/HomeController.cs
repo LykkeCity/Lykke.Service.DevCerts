@@ -42,7 +42,6 @@ namespace Lykke.Service.DevCerts.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            await _filesHelper.UpdateDb();
             var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
             Console.WriteLine(HttpContext.User.Identity.Name);
             return View(new UserModel {
@@ -56,7 +55,6 @@ namespace Lykke.Service.DevCerts.Controllers
         [HttpGet]
         public async Task<IActionResult> ManageUsers()
         {
-            await _filesHelper.UpdateDb();
             var users = await GetAllUsers();
 
             return View(new UsersModel
@@ -69,7 +67,6 @@ namespace Lykke.Service.DevCerts.Controllers
         [HttpGet]
         public async Task<FileStreamResult> GetCert()
         {
-            await _filesHelper.UpdateDb();
             try
             {
                 var fileName = HttpContext.User.Identity.Name + ".p12";
@@ -94,7 +91,6 @@ namespace Lykke.Service.DevCerts.Controllers
 
             if ((bool)user.Admin)
             {
-                Console.WriteLine("Row:" + rowKey);
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 await _filesHelper.UpdateDb();
                 try
