@@ -54,7 +54,7 @@ namespace Lykke.Service.DevCerts.Controllers
             catch(Exception e)
             {
                 Console.WriteLine(e);
-                pass = "No file with password";
+                pass = "No password file";
             }
 
 
@@ -199,7 +199,7 @@ namespace Lykke.Service.DevCerts.Controllers
                              CertDate = (uc.CertDate ?? DateTime.MinValue).ToString("G"),
                              CertIsRevoked = uc.CertIsRevoked ?? false,
                              Admin = uc.Admin ?? false,
-                             CertPassword = Crypto.DecryptStringAES(uc.CertPassword, _appSettings.DevCertsService.EncryptionPass),
+                             CertPassword =  String.IsNullOrWhiteSpace(uc.CertPassword) ? "No password file" : Crypto.DecryptStringAES(uc.CertPassword, _appSettings.DevCertsService.EncryptionPass),
                              HasCert = uc.HasCert ?? false,
                              RevokeDate = (uc.RevokeDate ?? DateTime.MinValue).ToString("G"),
                          }).ToList();

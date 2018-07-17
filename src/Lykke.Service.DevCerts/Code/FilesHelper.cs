@@ -149,7 +149,7 @@ namespace Lykke.Service.DevCerts.Code
             }
             else
             {
-                pass = "No file with password.";
+                pass = "No password file.";
             }
 
 

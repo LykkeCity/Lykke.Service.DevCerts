@@ -13,14 +13,23 @@
             <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download">Download</button>
         </div>
 
-        <div class="col-md-6">
+      <div class="col-md-6">
             <h2>Your password</h2>
             <div class="form-group has-feedback">
                 <div id="wrapper">
-                    <div class="col-md-8">
-                        <input type="password" value="@Model.CertPassword" class="form-control" id="password" placeholder="******" readonly>
-                    </div>
-                    <div class="col-md-4"><button type="button" class="btn btn-primary" id="showPwd" data-toggle="modal">Show password</button></div>
+                    @if (Model.CertPassword != "No password file")
+                    {
+                        <div class="col-md-8">
+                            <input type="password" value="@Model.CertPassword" class="form-control" id="password" placeholder="******" readonly>
+                        </div>
+                        <div class="col-md-4"><button type="button" class="btn btn-primary" id="showPwd" data-toggle="modal">Show password</button></div>
+                    }
+                    else
+                    {
+                        <div class="col-md-8">
+                            <input type="text" value="@Model.CertPassword" class="form-control" id="password" placeholder="******" readonly>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

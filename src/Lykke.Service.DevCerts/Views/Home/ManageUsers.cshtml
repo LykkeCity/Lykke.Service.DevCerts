@@ -26,10 +26,10 @@
                 var html =
                     '<table class="table table-stripped table-bordered"><tr><th>Email</th><th>Password</th><th>Date</th><th>Revoked</th><th>Actions</th></tr>';
                 for (var i = 0; i < list.length; i++) {
-                    var elem = list[i];
+                    var elem = list[i]; 
                     html += '<tr elemId="' + elem.RowKey + '"> ' +
                         '<td class="col-md-2"><span class="viewMode" class = "name-cert" >' + elem.Email + '</span></td>' +
-                        '<td class="col-md-2"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == false ? 'password' :'text') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'No Password' : elem.CertPassword) + '"><span class="input-group-btn"><button class="btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button></span></div>'  + '</span></td>' +
+                        '<td class="col-md-2"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' :'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '"><span class="input-group-btn"><button class="btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button></span></div>' + '</span></td>' +
                         '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
                         '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
                         '<td class="col-md-3" class="viewMode" >' + 
