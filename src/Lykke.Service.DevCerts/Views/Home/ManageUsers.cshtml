@@ -62,28 +62,38 @@
                 });
 
                 $('.revoke').click(function () {
-                    var elemId = $(this).parents('tr').attr('elemId');
+                    var $btn = $(this);
+                    if (!$btn.hasClass('disabled')) {
+                        $btn.addClass('disabled');
+                        var elemId = $(this).parents('tr').attr('elemId');
 
-                    if (confirm('Certificate will be revoked.')) {
-                        var url = '@this.Url.Action("RevokeCert", "Home")' + '/' + elemId;
+                        if (confirm('Certificate will be revoked.')) {
+                            var url = '@this.Url.Action("RevokeCert", "Home")' + '/' + elemId;
 
-                        $.post(url, elemId, function (data) {
-                            window.alert('Certificate revoked.');
-                            $.generateTable(data.Json);
-                        });
+                            $.post(url, elemId, function (data) {
+                                $btn.removeClass('disabled');
+                                window.alert('Certificate revoked.');
+                                $.generateTable(data.Json);
+                            });
+                        }
                     }
                 });
 
                 $('.change-pass').click(function () {
-                    var elemId = $(this).parents('tr').attr('elemId');
+                    var $btn = $(this);
+                    if (!$btn.hasClass('disabled')) {
+                        $btn.addClass('disabled');
+                        var elemId = $(this).parents('tr').attr('elemId');
 
-                    if (confirm('Password will be changed.')) {
-                        var url = '@this.Url.Action("ChangePass", "Home")' + '/' + elemId;
+                        if (confirm('Password will be changed.')) {
+                            var url = '@this.Url.Action("ChangePass", "Home")' + '/' + elemId;
 
-                        $.post(url, elemId, function (data) {
-                            window.alert('Password changed.');
-                            $.generateTable(data.Json);
-                        });
+                            $.post(url, elemId, function (data) {
+                                $btn.removeClass('disabled');
+                                window.alert('Password changed.');
+                                $.generateTable(data.Json);
+                            });
+                        }
                     }
                 });
 

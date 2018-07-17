@@ -71,18 +71,23 @@
             });
 
             $('.change-pass').click(function () {
-            var elemId = '@Model.RowKey';
-            if (confirm('Password will be changed.')) {
-                var url = '@this.Url.Action("ChangePassForUser", "Home")' + '/' + elemId;
+                var $btn = $(this);
+                if (!$btn.hasClass('disabled')) {
+                    $btn.addClass('disabled');
+                    var elemId = '@Model.RowKey';
+                    if (confirm('Password will be changed.')) {
+                        var url = '@this.Url.Action("ChangePassForUser", "Home")' + '/' + elemId;
 
-                $.post(url, elemId, function (data) {
-                    window.alert('Password changed. Please download updated certificate also.');
-                    var pass = eval('( ' + data.Json + ')');
-                    var pwd = document.getElementsByClassName('pwd');
-                    $(pwd).attr('value', pass);
-                    
-                });
-            }
+                        $.post(url, elemId, function (data) {
+                            $btn.removeClass('disabled');
+                            window.alert('Password changed. Please download updated certificate also.');
+                            var pass = eval('( ' + data.Json + ')');
+                            var pwd = document.getElementsByClassName('pwd');
+                            $(pwd).attr('value', pass);
+
+                        });
+                    }
+                }
             });
         });
     </script>
