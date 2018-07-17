@@ -4,8 +4,10 @@ using Lykke.Service.DevCerts.Core.User;
 using Lykke.Service.DevCerts.Services;
 using Lykke.Service.DevCerts.Settings;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lykke.Service.DevCerts.Code
@@ -28,7 +30,7 @@ namespace Lykke.Service.DevCerts.Code
             UpdateDb();
         }
 
-        public async Task UpdateDb(bool force = false)
+        public async Task UpdateDb(bool force = false, IUserEntity userEntity = null)
         {
             try
             {
@@ -39,6 +41,8 @@ namespace Lykke.Service.DevCerts.Code
                 {
                     LastTimeDbModified = File.GetCreationTimeUtc(filePath);
                     string lineOfText = "";
+
+                    var userEntityList = new List<IUserEntity>();
 
                     using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     {
@@ -86,16 +90,37 @@ namespace Lykke.Service.DevCerts.Code
                                 user.HasCert = true;
                                 user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
 
-                                var userInCloud = await _userRepository.GetUserByUserEmail(user.Email);
-
-                                if (userInCloud==null && !(bool)user.CertIsRevoked)
+                                if(userEntity!=null && user.Email == userEntity.Email)
                                 {
-                                    await UpoadCertToBlob(user.Email, "Lykke.Service.DevCerts", "localhost");                                    
+                                    userEntityList.Add(user);
+                                }
+                                else
+                                {
+                                    var userInCloud = await _userRepository.GetUserByUserEmail(user.Email);
+                                    
+                                    if (userInCloud == null && !(bool)user.CertIsRevoked)
+                                    {
+                                        await UpoadCertToBlob(user.Email, "Lykke.Service.DevCerts", "localhost");
+                                    }
+
+                                    await _userRepository.SaveUser(user);
                                 }
 
-                                await _userRepository.SaveUser(user);
                             }
                         }
+                    }
+
+                    if (userEntityList.Count > 0)
+                    {
+                        var users = userEntityList.OrderByDescending(u => u.CertDate);
+                        var userToSave = users.FirstOrDefault();
+
+                        if (!(bool)userToSave.CertIsRevoked)
+                        {
+                            await UpoadCertToBlob(userToSave.Email, "Lykke.Service.DevCerts", "localhost");
+                        }
+
+                        await _userRepository.SaveUser(userToSave);
                     }
                 }
             }
@@ -152,6 +177,10 @@ namespace Lykke.Service.DevCerts.Code
                 pass = "No password file.";
             }
 
+            if (String.IsNullOrWhiteSpace(pass))
+            {
+                pass = "No password file.";
+            }
 
 
             return pass.Substring(0, pass.Length - 1);
@@ -170,9 +199,9 @@ namespace Lykke.Service.DevCerts.Code
 
             shell.Bash();
 
-            await UpoadCertToBlob(creds, userName, ip);
+            Console.WriteLine("Change pass for " + creds);
 
-            await UpdateDb();
+            await UpdateDb(false, user);
         }
 
         public async Task GenerateCertAsync(IUserEntity user, string userName, string ip)
@@ -188,11 +217,9 @@ namespace Lykke.Service.DevCerts.Code
 
             shell.Bash();
 
-            Console.WriteLine(shell);
+            Console.WriteLine("Generate cert for " + creds);
 
-            await UpoadCertToBlob(creds, userName, ip);
-
-            await UpdateDb();
+            await UpdateDb(false, user);
         }
 
         public async Task RevokeUser(IUserEntity user, string userName, string ip)
@@ -206,11 +233,11 @@ namespace Lykke.Service.DevCerts.Code
             }
             shell += "./revoke.sh "  + creds;
 
-            Console.WriteLine(shell.Bash());
+            Console.WriteLine("Revoke user " + creds);
 
             await _blobDataRepository.DelBlobAsync(creds + ".p12");
 
-            await UpdateDb();
+            await UpdateDb(false, user);
 
         }
 

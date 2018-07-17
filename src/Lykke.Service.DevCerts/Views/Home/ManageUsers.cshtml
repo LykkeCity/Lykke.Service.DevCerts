@@ -29,7 +29,7 @@
                     var elem = list[i]; 
                     html += '<tr elemId="' + elem.RowKey + '"> ' +
                         '<td class="col-md-2"><span class="viewMode" class = "name-cert" >' + elem.Email + '</span></td>' +
-                        '<td class="col-md-2"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' :'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '"><span class="input-group-btn"><button class="btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button></span></div>' + '</span></td>' +
+                        '<td class="col-md-2"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' : 'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '"><span class="input-group-btn"><button class="btn btn-default reveal" type="button"><i class="glyphicon ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'glyphicon-eye-open' :'glyphicon-eye-close') + '"></i></button></span></div>' + '</span></td>' +
                         '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
                         '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
                         '<td class="col-md-3" class="viewMode" >' + 
@@ -44,6 +44,8 @@
                 parent.append($(html));
 
                 $(".reveal").on('click', function () {
+
+                    $(this).children('i').toggleClass('glyphicon-eye-close').toggleClass('glyphicon-eye-open');
                     var $pwd = $(this).parents('div').children('input');
                     if ($pwd.attr('type') === 'password') {
                         $pwd.attr('type', 'text');
@@ -86,30 +88,40 @@
                 });
 
                 $('.generate').click(function () {
-                    var elemId = $(this).parents('tr').attr('elemId');
+                    var $btn = $(this);
+                    if (!$btn.hasClass('disabled')) {
+                        $btn.addClass('disabled');
+                        var elemId = $(this).parents('tr').attr('elemId');
 
-                    if (confirm('New certificate will be generated.')) {
-                        var url = '@this.Url.Action("GenerateNew", "Home")' + '/' + elemId;
+                        if (confirm('New certificate will be generated.')) {
+                            var url = '@this.Url.Action("GenerateNew", "Home")' + '/' + elemId;
 
-                        $.post(url, elemId, function (data) {
-                            window.alert('New certificate was generated.');
-                            $.generateTable(data.Json);
-                        });
+                            $.post(url, elemId, function (data) {
+                                $btn.removeClass('disabled');
+                                window.alert('New certificate was generated.');
+                                $.generateTable(data.Json);
+                            });
+                        }
                     }
                 });  
             }
 
-            $('.reparce').click(function () {
+        $('.reparce').click(function () {
+            var $btn = $(this);
+            if (!$btn.hasClass('disabled')){
+                $btn.addClass('disabled');
                 var elemId = $(this).parents('tr').attr('elemId');
 
                 if (confirm('Do you whant to reparse database? This process can take a few time.')) {
                     var url = '@this.Url.Action("Reparse", "Home")';
 
                     $.post(url, elemId, function (data) {
+                        $btn.removeClass('disabled');
                         window.alert('DB was updated.');
                         $.generateTable(data.Json);
                     });
                 }
+            }
             });
 
 

@@ -87,8 +87,6 @@ namespace Lykke.Service.DevCerts.Controllers
                     return Content(string.Empty);
                 }
 
-                //await _filesHelper.UpdateDb();
-
                 var user = await _userRepository.GetUserByUserEmail(webSignature.Email);
                 if (user == null)
                 {

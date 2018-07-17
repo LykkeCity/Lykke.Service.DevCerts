@@ -20,7 +20,8 @@
     {
     <input type="hidden" id="returnUrl" value="@ViewData["returnUrl"]">
     <br />
-    <div class="g-signin2" data-onsuccess="googleSignIn" data-theme="dark" data-prompt="select_account"></div>  
+    <div class="g-signin2 disabled" data-onsuccess="googleSignIn" data-theme="dark" data-prompt="select_account" id="g-button"></div>  
+    <div id="loader"><h4>Please wait...</h4></div>
 
     }
 </div>
@@ -31,21 +32,29 @@
 @section Scripts
     {
     <script type="text/javascript">
-        
-        function googleSignIn(googleUser) {
+        $(function () {
+            $('#loader').hide();
 
-            var idToken = googleUser.getAuthResponse().id_token;
-            $.post('@Url.Action("Authenticate")',
-                {
-                    googleSignInIdToken: idToken,
-                    returnUrl: $('#returnUrl').val()
-                }, function(data) {
-                    if (data) {
-                        location.href = data;
-                    }
-                });
-            var auth2 = gapi.auth2.getAuthInstance();
-            auth2.disconnect();
-        }
+            
+
+        });
+        function googleSignIn(googleUser) {
+                $('#g-button').hide();
+                $('#loader').show();
+                var idToken = googleUser.getAuthResponse().id_token;
+                $.post('@Url.Action("Authenticate")',
+                    {
+                        googleSignInIdToken: idToken,
+                        returnUrl: $('#returnUrl').val()
+                    }, function(data) {
+                        if (data) {
+                            $('#g-button').show();
+                            $('#loader').hide();
+                            location.href = data;
+                        }
+                    });
+                var auth2 = gapi.auth2.getAuthInstance();
+                auth2.disconnect();
+            }
     </script>
 }

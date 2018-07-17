@@ -59,6 +59,7 @@ namespace Lykke.Service.DevCerts.Controllers
 
 
             return View(new UserModel {
+                RowKey = user.RowKey,
                 Email = user.Email,
                 CertIsRevoked = user.CertIsRevoked.HasValue ? (bool)user.CertIsRevoked : false,
                 CertPassword = pass
@@ -156,6 +157,30 @@ namespace Lykke.Service.DevCerts.Controllers
         }
 
         [HttpPost]
+        [Route("Home/ChangePassForUser/{rowKey}")]
+        public async Task<IActionResult> ChangePassForUser(string rowKey)
+        {
+            var userData = await _userRepository.GetUserByRowKey(rowKey);
+            await _filesHelper.ChangePass(userData, UserInfo.UserName, UserInfo.Ip);
+
+            userData = await _userRepository.GetUserByRowKey(rowKey);
+            var pass = "";
+
+            try
+            {
+                pass = Crypto.DecryptStringAES(userData.CertPassword, _appSettings.DevCertsService.EncryptionPass);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                pass = "No password file";
+            }
+
+            return new JsonResult(new { Json = JsonConvert.SerializeObject(pass) });
+
+        }
+
+        [HttpPost]
         [Route("Home/Reparse")]
         public async Task<IActionResult> Reparse(string rowKey)
         {
@@ -191,20 +216,19 @@ namespace Lykke.Service.DevCerts.Controllers
 
             var users = (from u in result
                          let uc = u as UserEntity
-                         orderby uc.RowKey
+                         orderby uc.Email
                          select new UserModel
                          {
                              RowKey = uc.RowKey,
                              Email = uc.Email,
-                             CertDate = (uc.CertDate ?? DateTime.MinValue).ToString("G"),
+                             CertDate = (uc.CertDate ?? DateTime.MinValue).ToString("dd/MM/yyyy HH:mm:ss"),
                              CertIsRevoked = uc.CertIsRevoked ?? false,
                              Admin = uc.Admin ?? false,
                              CertPassword =  String.IsNullOrWhiteSpace(uc.CertPassword) ? "No password file" : Crypto.DecryptStringAES(uc.CertPassword, _appSettings.DevCertsService.EncryptionPass),
                              HasCert = uc.HasCert ?? false,
-                             RevokeDate = (uc.RevokeDate ?? DateTime.MinValue).ToString("G"),
+                             RevokeDate = (uc.RevokeDate ?? DateTime.MinValue).ToString("dd/MM/yyyy HH:mm:ss"),
                          }).ToList();
 
-            users.OrderBy(u => u.Email);
             return users;
         }
     }
