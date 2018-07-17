@@ -44,10 +44,24 @@ namespace Lykke.Service.DevCerts.Controllers
         {
             var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
             Console.WriteLine(HttpContext.User.Identity.Name);
+
+            var pass = "";
+
+            try
+            {
+                pass = Crypto.DecryptStringAES(user.CertPassword, _appSettings.DevCertsService.EncryptionPass);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+                pass = "No file with password";
+            }
+
+
             return View(new UserModel {
                 Email = user.Email,
-                CertIsRevoked = user.CertIsRevoked.HasValue ?  (bool)user.CertIsRevoked : false ,
-                CertPassword = Crypto.DecryptStringAES(user.CertPassword, _appSettings.DevCertsService.EncryptionPass)
+                CertIsRevoked = user.CertIsRevoked.HasValue ? (bool)user.CertIsRevoked : false,
+                CertPassword = pass
             });
         }
                 
@@ -92,7 +106,6 @@ namespace Lykke.Service.DevCerts.Controllers
             if ((bool)user.Admin)
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
-                await _filesHelper.UpdateDb();
                 try
                 {
                     var fileName = userData.Email + ".p12";
@@ -143,6 +156,20 @@ namespace Lykke.Service.DevCerts.Controllers
         }
 
         [HttpPost]
+        [Route("Home/Reparse")]
+        public async Task<IActionResult> Reparse(string rowKey)
+        {
+            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
+
+            if ((bool)user.Admin)
+            {
+                await _filesHelper.UpdateDb();
+            }
+            var users = await GetAllUsers();
+            return new JsonResult(new { Json = JsonConvert.SerializeObject(users) });
+        }
+
+        [HttpPost]
         [Route("Home/GenerateNew/{rowKey}")]
         public async Task<IActionResult> GenerateNew(string rowKey)
         {
@@ -160,7 +187,6 @@ namespace Lykke.Service.DevCerts.Controllers
 
         private async Task<List<UserModel>> GetAllUsers()
         {
-            await _filesHelper.UpdateDb();
             var result = await _userRepository.GetUsers();
 
             var users = (from u in result

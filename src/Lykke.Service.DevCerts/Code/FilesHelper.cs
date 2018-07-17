@@ -25,16 +25,19 @@ namespace Lykke.Service.DevCerts.Code
             _appSettings = appSettings;
             _userRepository = userRepository;
             _blobDataRepository = blobDataRepository;
-
+            UpdateDb();
         }
 
         public async Task UpdateDb()
         {
             try
             {
-                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db/index.txt");
-                if (LastTimeDbModified < File.GetLastWriteTime(filePath))
-                {                    
+                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db");
+                filePath = Path.Combine(filePath, "index.txt");
+
+                if (LastTimeDbModified < File.GetCreationTimeUtc(filePath))
+                {
+                    LastTimeDbModified = File.GetCreationTimeUtc(filePath);
                     string lineOfText = "";
 
                     using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
@@ -132,13 +135,24 @@ namespace Lykke.Service.DevCerts.Code
             string pass = "";
             var shell = "";
 
-            if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
-            {
-                shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
-            }
-            shell += " cat " + creds + ".pass";
+            var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".pass");
 
-            pass = shell.Bash();
+            if (File.Exists(filePath))
+            {
+                if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
+                {
+                    shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
+                }
+                shell += " cat " + creds + ".pass";
+
+                pass = shell.Bash();
+            }
+            else
+            {
+                pass = "No file with password.";
+            }
+
+
 
             return pass.Substring(0, pass.Length - 1);
         }
@@ -173,6 +187,8 @@ namespace Lykke.Service.DevCerts.Code
             shell += " ./" + _appSettings.DevCertsService.ScriptName + " " + creds;
 
             shell.Bash();
+
+            Console.WriteLine(shell);
 
             await UpoadCertToBlob(creds, userName, ip);
 

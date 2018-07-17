@@ -5,6 +5,10 @@
     ViewData["Title"] = "Manage Users";
 }
 
+<div>
+    <button type="button" class="btn btn-primary reparce pull-right"  title="This process can take a few time">Reparce DB</button>
+    <p></p>
+</div>
 <br />
 <br />
 <div class="editItems">
@@ -14,7 +18,9 @@
 @section Scripts
     {
 <script type="text/javascript">
-        $(function () {
+    $(function () {
+        $('.reparce').tooltip();
+
             $.generateTable = function (json) {
                 var list = eval('( ' + json + ')');
                 var html =
@@ -90,8 +96,21 @@
                             $.generateTable(data.Json);
                         });
                     }
-                });
+                });  
             }
+
+            $('.reparce').click(function () {
+                var elemId = $(this).parents('tr').attr('elemId');
+
+                if (confirm('Do you whant to reparse database? This process can take a few time.')) {
+                    var url = '@this.Url.Action("Reparse", "Home")';
+
+                    $.post(url, elemId, function (data) {
+                        window.alert('DB was updated.');
+                        $.generateTable(data.Json);
+                    });
+                }
+            });
 
 
             $.generateTable('@Html.Raw(JsonConvert.SerializeObject(Model.Users).Replace("'", "\\'").Replace("\"", "\\\""))');
