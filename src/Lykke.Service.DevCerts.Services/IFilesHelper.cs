@@ -8,7 +8,7 @@ namespace Lykke.Service.DevCerts.Services
 {
     public interface IFilesHelper
     {
-        Task UpdateDb();
+        Task UpdateDb(bool force = false);
         Task UpoadCertToBlob(string creds, string userName, string ip);
         string GetCertPass(string creds);
         Task GenerateCertAsync(IUserEntity user, string userName, string ip);

@@ -28,14 +28,14 @@ namespace Lykke.Service.DevCerts.Code
             UpdateDb();
         }
 
-        public async Task UpdateDb()
+        public async Task UpdateDb(bool force = false)
         {
             try
             {
                 var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db");
                 filePath = Path.Combine(filePath, "index.txt");
 
-                if (LastTimeDbModified < File.GetCreationTimeUtc(filePath))
+                if (force || LastTimeDbModified.ToUniversalTime() <= File.GetCreationTimeUtc(filePath))
                 {
                     LastTimeDbModified = File.GetCreationTimeUtc(filePath);
                     string lineOfText = "";
@@ -143,7 +143,7 @@ namespace Lykke.Service.DevCerts.Code
                 {
                     shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
                 }
-                shell += " cat " + creds + ".pass";
+                shell += "cat " + creds + ".pass";
 
                 pass = shell.Bash();
             }
@@ -166,7 +166,7 @@ namespace Lykke.Service.DevCerts.Code
             {
                 shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
             }
-            shell += " ./changepass.sh" + _appSettings.DevCertsService.ScriptName + " " + creds;
+            shell += "./changepass.sh " + creds;
 
             shell.Bash();
 
@@ -184,7 +184,7 @@ namespace Lykke.Service.DevCerts.Code
             {
                 shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
             }
-            shell += " ./" + _appSettings.DevCertsService.ScriptName + " " + creds;
+            shell += "./" + _appSettings.DevCertsService.ScriptName + " " + creds;
 
             shell.Bash();
 
@@ -204,7 +204,7 @@ namespace Lykke.Service.DevCerts.Code
             {
                 shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
             }
-            shell += " ./revoke.sh "  + creds;
+            shell += "./revoke.sh "  + creds;
 
             Console.WriteLine(shell.Bash());
 

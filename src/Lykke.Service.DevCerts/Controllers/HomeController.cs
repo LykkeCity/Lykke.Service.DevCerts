@@ -163,7 +163,7 @@ namespace Lykke.Service.DevCerts.Controllers
 
             if ((bool)user.Admin)
             {
-                await _filesHelper.UpdateDb();
+                await _filesHelper.UpdateDb(true);
             }
             var users = await GetAllUsers();
             return new JsonResult(new { Json = JsonConvert.SerializeObject(users) });
