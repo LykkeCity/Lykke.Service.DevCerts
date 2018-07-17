@@ -62,8 +62,10 @@ namespace Lykke.Service.DevCerts.Code
                                             break;
                                         case 1:
                                             line[i] = line[i].Substring(0, line[i].Length - 1);
-                                            var dateTill = DateTime.ParseExact(line[i], "yyMMddHHmmss", CultureInfo.InvariantCulture).ToLocalTime();                                                                                       
-                                            user.CertDate = dateTill.AddYears(-10);
+                                            var dateTill = DateTime.ParseExact(line[i], "yyMMddHHmmss", CultureInfo.InvariantCulture).ToLocalTime();
+                                            dateTill = dateTill.AddYears(-10);
+                                            dateTill = dateTill.AddDays(3);
+                                            user.CertDate = dateTill;
                                             break;
                                         case 2:
                                             if ((bool)user.CertIsRevoked)
@@ -112,8 +114,8 @@ namespace Lykke.Service.DevCerts.Code
 
                     if (userEntityList.Count > 0)
                     {
-                        var users = userEntityList.OrderByDescending(u => u.CertDate);
-                        var userToSave = users.FirstOrDefault();
+                        var sortedlist = userEntityList.OrderByDescending(u => (bool)u.CertIsRevoked ? u.RevokeDate.Value.ToUniversalTime() : u.CertDate.Value.ToUniversalTime());
+                        var userToSave = sortedlist.FirstOrDefault();
 
                         if (!(bool)userToSave.CertIsRevoked)
                         {
@@ -233,6 +235,7 @@ namespace Lykke.Service.DevCerts.Code
             }
             shell += "./revoke.sh "  + creds;
 
+            shell.Bash();
             Console.WriteLine("Revoke user " + creds);
 
             await _blobDataRepository.DelBlobAsync(creds + ".p12");
