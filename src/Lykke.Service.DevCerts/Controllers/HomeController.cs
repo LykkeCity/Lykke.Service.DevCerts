@@ -40,7 +40,8 @@ namespace Lykke.Service.DevCerts.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        [Route("Home/Cert")]
+        public async Task<IActionResult> Cert()
         {
             var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
             Console.WriteLine(HttpContext.User.Identity.Name);
@@ -68,6 +69,7 @@ namespace Lykke.Service.DevCerts.Controllers
                 
 
         [HttpGet]
+        [Route("Home/ManageUsers")]
         public async Task<IActionResult> ManageUsers()
         {
             var users = await GetAllUsers();
@@ -80,6 +82,7 @@ namespace Lykke.Service.DevCerts.Controllers
 
 
         [HttpGet]
+        [Route("Home/GetCert")]
         public async Task<FileStreamResult> GetCert()
         {
             try

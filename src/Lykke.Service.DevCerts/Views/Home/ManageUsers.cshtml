@@ -6,7 +6,14 @@
 }
 
 <div>
-    <button type="button" class="btn btn-primary reparce pull-right"  title="This process can take a few time">Reparce DB</button>
+    <div id="message">
+        <div class="my-alert alert alert-success" id="success-alert">
+            <button type="button" class="close" data-dismiss="alert">x</button>
+            Password was copied.
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary reparce pull-right" data-toggle="tooltip" data-placement="bottom" title="This process can take a few time">Reparce DB</button>
     <p></p>
 </div>
 <br />
@@ -19,20 +26,21 @@
     {
 <script type="text/javascript">
     $(function () {
-        $('.reparce').tooltip();
+
+        $('[data-toggle="tooltip"]').tooltip();
 
             $.generateTable = function (json) {
                 var list = eval('( ' + json + ')');
                 var html =
                     '<table class="table table-stripped table-bordered"><tr><th>Email</th><th>Password</th><th>Date</th><th>Revoked</th><th>Actions</th></tr>';
                 for (var i = 0; i < list.length; i++) {
-                    var elem = list[i]; 
+                    var elem = list[i];
                     html += '<tr elemId="' + elem.RowKey + '"> ' +
                         '<td class="col-md-2"><span class="viewMode" class = "name-cert" >' + elem.Email + '</span></td>' +
-                        '<td class="col-md-2"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' : 'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '"><span class="input-group-btn"><button class="btn btn-default reveal" type="button"><i class="glyphicon ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'glyphicon-eye-open' :'glyphicon-eye-close') + '"></i></button></span></div>' + '</span></td>' +
+                        '<td class="col-md-3"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' : 'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '" readonly><span class="input-group-btn"> ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? '' : '<button class="btn btn-default copy" type="button" data-toggle="tooltip" title="Copy password"><i class="glyphicon glyphicon glyphicon-copy"></i></button>') + '<button class="btn btn-default reveal" type="button" data-toggle="tooltip" title="Show/hide password"><i class="glyphicon ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'glyphicon-eye-open' :'glyphicon-eye-close') + '"></i></button></span></div>' + '</span></td>' +
                         '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
                         '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
-                        '<td class="col-md-3" class="viewMode" >' + 
+                        '<td class="col-md-3" class="viewMode" >' +
                         (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default generate">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default download">Download</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default revoke">Revoke</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default change-pass">New pass</a>') +
                         '</td>' +
                         '</tr>';
@@ -42,6 +50,24 @@
                 var parent = $('.editItems');
                 parent.empty();
                 parent.append($(html));
+
+                $('.copy').click(function () {
+                    var $value = $(this).parents('div').children('input').val();
+                    copyToClipboard($value);
+                });
+
+
+                function copyToClipboard(text) {
+                    var $temp = $("<input>");
+                    $("body").append($temp);
+                    $temp.val(text).select();
+                    document.execCommand("copy");
+                    $temp.remove();
+                    $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
+                        $("#success-alert").slideUp(500);
+                    });
+                }
+
 
                 $(".reveal").on('click', function () {
 
@@ -57,7 +83,7 @@
                 $('.download').click(function () {
                     var elemId = $(this).parents('tr').attr('elemId');
 
-                    var url = '@this.Url.Action("GetCertificates", "Home")' + '/'+ elemId;
+                    var url = 'GetCertificates/'+ elemId;
                     window.open(url, "_blank");
                 });
 
@@ -68,7 +94,7 @@
                         var elemId = $(this).parents('tr').attr('elemId');
 
                         if (confirm('Certificate will be revoked.')) {
-                            var url = '@this.Url.Action("RevokeCert", "Home")' + '/' + elemId;
+                            var url = 'RevokeCert/' + elemId;
 
                             $.post(url, elemId, function (data) {
                                 $btn.removeClass('disabled');
@@ -86,7 +112,7 @@
                         var elemId = $(this).parents('tr').attr('elemId');
 
                         if (confirm('Password will be changed.')) {
-                            var url = '@this.Url.Action("ChangePass", "Home")' + '/' + elemId;
+                            var url = 'ChangePass/' + elemId;
 
                             $.post(url, elemId, function (data) {
                                 $btn.removeClass('disabled');
@@ -104,7 +130,7 @@
                         var elemId = $(this).parents('tr').attr('elemId');
 
                         if (confirm('New certificate will be generated.')) {
-                            var url = '@this.Url.Action("GenerateNew", "Home")' + '/' + elemId;
+                            var url = 'GenerateNew/' + elemId;
 
                             $.post(url, elemId, function (data) {
                                 $btn.removeClass('disabled');
@@ -113,7 +139,7 @@
                             });
                         }
                     }
-                });  
+                });
             }
 
         $('.reparce').click(function () {
@@ -123,7 +149,7 @@
                 var elemId = $(this).parents('tr').attr('elemId');
 
                 if (confirm('Do you whant to reparse database? This process can take a few time.')) {
-                    var url = '@this.Url.Action("Reparse", "Home")';
+                    var url = 'Reparse';
 
                     $.post(url, elemId, function (data) {
                         $btn.removeClass('disabled');

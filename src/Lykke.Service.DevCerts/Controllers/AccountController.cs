@@ -21,7 +21,7 @@ namespace Lykke.Service.DevCerts.Controllers
     [IgnoreLogAction]
     public class AccountController : BaseController
     {
-        private string HomeUrl => Url.Action("Index", "Home");
+        private string HomeUrl => Url.Action("Cert", "Home");
         private readonly AppSettings _appSettings;
         private readonly IUserRepository _userRepository;
         private readonly IHostingEnvironment _hostingEnvironment;
@@ -66,6 +66,7 @@ namespace Lykke.Service.DevCerts.Controllers
         }
 
         [HttpGet]
+        [Route("Account/SignOut")]
         public async Task<IActionResult> SignOut()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -110,7 +111,7 @@ namespace Lykke.Service.DevCerts.Controllers
                 var claimsPrinciple = new ClaimsPrincipal(claimsIdentity);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrinciple);
                 //await _userHistoryRepository.SaveUserLoginHistoryAsync(user, UserInfo.Ip);
-                return Content(Url.IsLocalUrl(returnUrl) ? returnUrl : "~/");
+                return Content(Url.IsLocalUrl(returnUrl) ? returnUrl : HomeUrl);
             }
             catch (Exception ex)
             {

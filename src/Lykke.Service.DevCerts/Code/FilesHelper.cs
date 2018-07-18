@@ -39,7 +39,7 @@ namespace Lykke.Service.DevCerts.Code
 
                 if (force || LastTimeDbModified.ToUniversalTime() <= File.GetCreationTimeUtc(filePath))
                 {
-                    LastTimeDbModified = File.GetCreationTimeUtc(filePath);
+
                     string lineOfText = "";
 
                     var userEntityList = new List<IUserEntity>();
@@ -89,8 +89,7 @@ namespace Lykke.Service.DevCerts.Code
                                     }
                                 }
 
-                                user.HasCert = true;
-                                user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
+                                
 
                                 if(userEntity!=null && user.Email == userEntity.Email)
                                 {
@@ -98,6 +97,9 @@ namespace Lykke.Service.DevCerts.Code
                                 }
                                 else
                                 {
+                                    user.HasCert = true;
+                                    user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
+
                                     var userInCloud = await _userRepository.GetUserByUserEmail(user.Email);
                                     
                                     if (userInCloud == null && !(bool)user.CertIsRevoked)
@@ -117,6 +119,9 @@ namespace Lykke.Service.DevCerts.Code
                         var sortedlist = userEntityList.OrderByDescending(u => (bool)u.CertIsRevoked ? u.RevokeDate.Value.ToUniversalTime() : u.CertDate.Value.ToUniversalTime());
                         var userToSave = sortedlist.FirstOrDefault();
 
+                        userToSave.HasCert = true;
+                        userToSave.CertPassword = Crypto.EncryptStringAES(GetCertPass(userToSave.Email), _appSettings.DevCertsService.EncryptionPass);
+
                         if (!(bool)userToSave.CertIsRevoked)
                         {
                             await UpoadCertToBlob(userToSave.Email, "Lykke.Service.DevCerts", "localhost");
@@ -124,6 +129,8 @@ namespace Lykke.Service.DevCerts.Code
 
                         await _userRepository.SaveUser(userToSave);
                     }
+
+                    LastTimeDbModified = File.GetCreationTimeUtc(filePath);
                 }
             }
             catch (Exception e)
