@@ -4,14 +4,6 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div id="message">
-    <div class="my-alert alert alert-success" id="success-alert">
-        <button type="button" class="close" data-dismiss="alert">x</button>
-        Password was copied.
-    </div>
-</div>
-
-
 <div class="row">
     @if (!Model.CertIsRevoked)
     {
@@ -80,9 +72,6 @@
                 $temp.val(text).select();
                 document.execCommand("copy");
                 $temp.remove();
-                $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
-                    $("#success-alert").slideUp(500);
-                });
             }
 
             $('[data-toggle="tooltip"]').tooltip();
