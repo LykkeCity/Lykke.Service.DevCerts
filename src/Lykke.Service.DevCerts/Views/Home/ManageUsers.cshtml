@@ -1,0 +1,160 @@
+﻿@using Lykke.Service.DevCerts.Models
+@using Newtonsoft.Json
+@model UsersModel
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div>
+    <button type="button" class="btn btn-primary reparce pull-right" data-toggle="tooltip" data-placement="bottom" title="This process can take a few time">Reparce DB</button>
+    <p></p>
+</div>
+<br />
+<br />
+<div class="editItems">
+
+</div>
+
+@section Scripts
+    {
+<script type="text/javascript">
+    $(function () {
+
+        $('[data-toggle="tooltip"]').tooltip();
+
+            $.generateTable = function (json) {
+                var list = eval('( ' + json + ')');
+                var html =
+                    '<table class="table table-stripped table-bordered"><tr><th>Email</th><th>Password</th><th>Date</th><th>Revoked</th><th>Actions</th></tr>';
+                for (var i = 0; i < list.length; i++) {
+                    var elem = list[i];
+                    html += '<tr elemId="' + elem.RowKey + '"> ' +
+                        '<td class="col-md-2"><span class="viewMode" class = "name-cert" >' + elem.Email + '</span></td>' +
+                        '<td class="col-md-3"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' : 'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '" readonly><span class="input-group-btn"> ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? '' : '<button class="btn btn-default copy" type="button" data-toggle="tooltip" title="Copy password"><i class="glyphicon glyphicon glyphicon-copy"></i></button>') + '<button class="btn btn-default reveal" type="button" data-toggle="tooltip" title="Show/hide password"><i class="glyphicon ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'glyphicon-eye-open' :'glyphicon-eye-close') + '"></i></button></span></div>' + '</span></td>' +
+                        '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
+                        '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
+                        '<td class="col-md-3" class="viewMode" >' +
+                        (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default generate">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default download">Download</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default revoke">Revoke</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default change-pass">New pass</a>') +
+                        '</td>' +
+                        '</tr>';
+
+                }
+                html += '</table>';
+                var parent = $('.editItems');
+                parent.empty();
+                parent.append($(html));
+
+                $('.copy').click(function () {
+                    var $value = $(this).parents('div').children('input').val();
+                    copyToClipboard($value);
+                });
+
+
+                function copyToClipboard(text) {
+                    var $temp = $("<input>");
+                    $("body").append($temp);
+                    $temp.val(text).select();
+                    document.execCommand("copy");
+                    $temp.remove();
+                    $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
+                        $("#success-alert").slideUp(500);
+                    });
+                }
+
+
+                $(".reveal").on('click', function () {
+
+                    $(this).children('i').toggleClass('glyphicon-eye-close').toggleClass('glyphicon-eye-open');
+                    var $pwd = $(this).parents('div').children('input');
+                    if ($pwd.attr('type') === 'password') {
+                        $pwd.attr('type', 'text');
+                    } else {
+                        $pwd.attr('type', 'password');
+                    }
+                });
+
+                $('.download').click(function () {
+                    var elemId = $(this).parents('tr').attr('elemId');
+
+                    var url = 'GetCertificates/'+ elemId;
+                    window.open(url, "_blank");
+                });
+
+                $('.revoke').click(function () {
+                    var $btn = $(this);
+                    if (!$btn.hasClass('disabled')) {
+                        $btn.addClass('disabled');
+                        var elemId = $(this).parents('tr').attr('elemId');
+
+                        if (confirm('Certificate will be revoked.')) {
+                            var url = 'RevokeCert/' + elemId;
+
+                            $.post(url, elemId, function (data) {
+                                $btn.removeClass('disabled');
+                                window.alert('Certificate revoked.');
+                                $.generateTable(data.Json);
+                            });
+                        }
+                    }
+                });
+
+                $('.change-pass').click(function () {
+                    var $btn = $(this);
+                    if (!$btn.hasClass('disabled')) {
+                        $btn.addClass('disabled');
+                        var elemId = $(this).parents('tr').attr('elemId');
+
+                        if (confirm('Password will be changed.')) {
+                            var url = 'ChangePass/' + elemId;
+
+                            $.post(url, elemId, function (data) {
+                                $btn.removeClass('disabled');
+                                window.alert('Password changed.');
+                                $.generateTable(data.Json);
+                            });
+                        }
+                    }
+                });
+
+                $('.generate').click(function () {
+                    var $btn = $(this);
+                    if (!$btn.hasClass('disabled')) {
+                        $btn.addClass('disabled');
+                        var elemId = $(this).parents('tr').attr('elemId');
+
+                        if (confirm('New certificate will be generated.')) {
+                            var url = 'GenerateNew/' + elemId;
+
+                            $.post(url, elemId, function (data) {
+                                $btn.removeClass('disabled');
+                                window.alert('New certificate was generated.');
+                                $.generateTable(data.Json);
+                            });
+                        }
+                    }
+                });
+            }
+
+        $('.reparce').click(function () {
+            var $btn = $(this);
+            if (!$btn.hasClass('disabled')){
+                $btn.addClass('disabled');
+                var elemId = $(this).parents('tr').attr('elemId');
+
+                if (confirm('Do you whant to reparse database? This process can take a few time.')) {
+                    var url = 'Reparse';
+
+                    $.post(url, elemId, function (data) {
+                        $btn.removeClass('disabled');
+                        window.alert('DB was updated.');
+                        $.generateTable(data.Json);
+                    });
+                }
+            }
+            });
+
+
+            $.generateTable('@Html.Raw(JsonConvert.SerializeObject(Model.Users).Replace("'", "\\'").Replace("\"", "\\\""))');
+        });
+</script>
+}

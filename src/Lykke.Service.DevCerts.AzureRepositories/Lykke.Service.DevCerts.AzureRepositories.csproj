@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>Lykke.Service.DevCerts.AzureRepositories</AssemblyName>
+    <RootNamespace>Lykke.Service.DevCerts.AzureRepositories</RootNamespace>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Lykke.AzureStorage" Version="8.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Lykke.Service.DevCerts.Core\Lykke.Service.DevCerts.Core.csproj" />
+  </ItemGroup>
+</Project>
