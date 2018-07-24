@@ -37,7 +37,7 @@ namespace Lykke.Service.DevCerts.Code
                 var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db");
                 filePath = Path.Combine(filePath, "index.txt");
 
-                if (force || LastTimeDbModified.ToUniversalTime() <= File.GetCreationTimeUtc(filePath))
+                if (force || LastTimeDbModified.ToUniversalTime() <= File.GetCreationTimeUtc(filePath) && File.Exists(filePath))
                 {
 
                     string lineOfText = "";
@@ -89,22 +89,22 @@ namespace Lykke.Service.DevCerts.Code
                                     }
                                 }
 
-                                
-
-                                if(userEntity!=null && user.Email == userEntity.Email)
+                                if (userEntity!=null && user.Email == userEntity.Email.Substring(0, userEntity.Email.IndexOf('@')))
                                 {
                                     userEntityList.Add(user);
                                 }
                                 else
                                 {
                                     user.HasCert = true;
+
                                     user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
 
                                     var userInCloud = await _userRepository.GetUserByUserEmail(user.Email);
-                                    
-                                    if (userInCloud == null && !(bool)user.CertIsRevoked)
+
+                                    if (userInCloud == null)
                                     {
                                         await UpoadCertToBlob(user.Email, "Lykke.Service.DevCerts", "localhost");
+
                                     }
 
                                     await _userRepository.SaveUser(user);
@@ -146,16 +146,23 @@ namespace Lykke.Service.DevCerts.Code
                 var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
 
                 byte[] file;
-
-                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                if(File.Exists(filePath))
                 {
-                    using (var reader = new BinaryReader(stream))
+                    using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     {
-                        file = reader.ReadBytes((int)stream.Length);
+                        using (var reader = new BinaryReader(stream))
+                        {
+                            file = reader.ReadBytes((int)stream.Length);
+                        }
                     }
+
+                    await _blobDataRepository.UpdateBlobAsync(file, userName, ip, creds + ".p12");
+                }
+                else
+                {
+                    Console.WriteLine("File does not exist. Path:" + filePath);
                 }
 
-                await _blobDataRepository.UpdateBlobAsync(file, userName, ip, creds + ".p12");
             }
             catch (Exception e)
             {
@@ -197,7 +204,7 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task ChangePass(IUserEntity user, string userName, string ip)
         {
-            var creds = user.Email;
+            var creds = user.Email.Substring(0, user.Email.IndexOf('@'));
             var shell = "";
 
             if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
@@ -215,7 +222,7 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task GenerateCertAsync(IUserEntity user, string userName, string ip)
         {
-            var creds = user.Email;
+            var creds = user.Email.Substring(0, user.Email.IndexOf('@'));
             var shell = "";
 
             if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
@@ -233,7 +240,7 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task RevokeUser(IUserEntity user, string userName, string ip)
         {
-            var creds = user.Email;
+            var creds = user.Email.Substring(0, user.Email.IndexOf('@'));
             var shell = "";
 
             if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))

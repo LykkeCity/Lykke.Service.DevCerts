@@ -87,7 +87,8 @@ namespace Lykke.Service.DevCerts.Controllers
         {
             try
             {
-                var fileName = HttpContext.User.Identity.Name + ".p12";
+                var creds = HttpContext.User.Identity.Name.Substring(0, HttpContext.User.Identity.Name.IndexOf('@'));
+                var fileName = creds + ".p12";
                 var blob = await _blobDataRepository.GetDataAsync(fileName);
                 Stream blobStream = blob.AsStream();
                 return File(blobStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
@@ -112,7 +113,8 @@ namespace Lykke.Service.DevCerts.Controllers
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 try
                 {
-                    var fileName = userData.Email + ".p12";
+                    var creds = userData.Email.Substring(0, userData.Email.IndexOf('@'));
+                    var fileName = creds + ".p12";
                     var blob = await _blobDataRepository.GetDataAsync(fileName);
                     Stream blobStream = blob.AsStream();
                     return File(blobStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);

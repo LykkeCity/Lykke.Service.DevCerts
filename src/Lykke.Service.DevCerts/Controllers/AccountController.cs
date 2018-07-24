@@ -89,6 +89,7 @@ namespace Lykke.Service.DevCerts.Controllers
                 }
 
                 var user = await _userRepository.GetUserByUserEmail(webSignature.Email);
+
                 if (user == null)
                 {
                     user = new UserEntity() { Email = webSignature.Email, Admin = false };
