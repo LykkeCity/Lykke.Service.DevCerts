@@ -101,7 +101,7 @@ namespace Lykke.Service.DevCerts.Code
 
                                     var userInCloud = await _userRepository.GetUserByUserEmail(user.Email);
 
-                                    if (userInCloud == null)
+                                    if (userInCloud == null || force )
                                     {
                                         await UpoadCertToBlob(user.Email, "Lykke.Service.DevCerts", "localhost");
 
@@ -207,7 +207,11 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task ChangePass(IUserEntity user, string userName, string ip)
         {
-            var creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            string creds = "";
+            if (user.Email.Contains('@'))
+                creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            else
+                creds = user.Email;
             var shell = "";
 
             if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
@@ -225,7 +229,11 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task GenerateCertAsync(IUserEntity user, string userName, string ip)
         {
-            var creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            string creds = "";
+            if (user.Email.Contains('@'))
+                creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            else
+                creds = user.Email;
             var shell = "";
 
             if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
@@ -243,7 +251,11 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task RevokeUser(IUserEntity user, string userName, string ip)
         {
-            var creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            string creds = "";
+            if (user.Email.Contains('@'))
+                creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            else
+             creds = user.Email;
             var shell = "";
 
             if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
@@ -255,8 +267,18 @@ namespace Lykke.Service.DevCerts.Code
             shell.Bash();
             Console.WriteLine("Revoke user " + creds);
 
-            await _blobDataRepository.DelBlobAsync(creds + ".p12");
-
+            string[] extrntions = new[] { ".p12", "-dev.ovpn", "-test.ovpn" };
+            foreach (var extention in extrntions)
+            {
+                try
+                {
+                    await _blobDataRepository.DelBlobAsync(creds + extention);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
             await UpdateDb(false, user);
 
         }

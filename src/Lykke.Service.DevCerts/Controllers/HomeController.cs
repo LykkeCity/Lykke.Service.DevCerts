@@ -2,6 +2,7 @@
 using Lykke.Service.DevCerts.Code;
 using Lykke.Service.DevCerts.Core.Blob;
 using Lykke.Service.DevCerts.Core.User;
+using Lykke.Service.DevCerts.Extensions;
 using Lykke.Service.DevCerts.Models;
 using Lykke.Service.DevCerts.Services;
 using Lykke.Service.DevCerts.Settings;
@@ -107,9 +108,8 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/GetCertificates/{rowKey}/{ext}")]
         public async Task<FileStreamResult> GetCertificates(string rowKey, string ext)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
             ext = ext.Substring(3);
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 try
@@ -134,9 +134,7 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/RevokeCert/{rowKey}")]
         public async Task<IActionResult> RevokeCert(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 await _filesHelper.RevokeUser(userData, UserInfo.UserName,UserInfo.Ip);               
@@ -150,9 +148,7 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/ChangePass/{rowKey}")]
         public async Task<IActionResult> ChangePass(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 await _filesHelper.ChangePass(userData, UserInfo.UserName,UserInfo.Ip);               
@@ -190,9 +186,7 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/Reparse")]
         public async Task<IActionResult> Reparse(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 await _filesHelper.UpdateDb(true);
             }
@@ -204,9 +198,7 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/GenerateNew/{rowKey}")]
         public async Task<IActionResult> GenerateNew(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 await _filesHelper.GenerateCertAsync(userData, UserInfo.UserName, UserInfo.Ip);
