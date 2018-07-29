@@ -82,13 +82,14 @@ namespace Lykke.Service.DevCerts.Controllers
 
 
         [HttpGet]
-        [Route("Home/GetCert")]
-        public async Task<FileStreamResult> GetCert()
+        [Route("Home/GetCert/{ext?}")]
+        public async Task<FileStreamResult> GetCert(string ext)
         {
+            ext = ext.Substring(3);
             try
             {
                 var creds = HttpContext.User.Identity.Name.Substring(0, HttpContext.User.Identity.Name.IndexOf('@'));
-                var fileName = creds + ".p12";
+                var fileName = creds + ext;
                 var blob = await _blobDataRepository.GetDataAsync(fileName);
                 Stream blobStream = blob.AsStream();
                 return File(blobStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
@@ -103,18 +104,18 @@ namespace Lykke.Service.DevCerts.Controllers
         }
 
         [HttpGet]
-        [Route("Home/GetCertificates/{rowKey}")]
-        public async Task<FileStreamResult> GetCertificates(string rowKey)
+        [Route("Home/GetCertificates/{rowKey}/{ext}")]
+        public async Task<FileStreamResult> GetCertificates(string rowKey, string ext)
         {
             var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
+            ext = ext.Substring(3);
             if ((bool)user.Admin)
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 try
                 {
                     var creds = userData.Email.Substring(0, userData.Email.IndexOf('@'));
-                    var fileName = creds + ".p12";
+                    var fileName = creds + ext;
                     var blob = await _blobDataRepository.GetDataAsync(fileName);
                     Stream blobStream = blob.AsStream();
                     return File(blobStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);

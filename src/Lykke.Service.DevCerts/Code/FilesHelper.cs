@@ -141,34 +141,37 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task UpoadCertToBlob(string creds, string userName, string ip)
         {
-            try
+            string[] extrntions = new []{ ".p12", "-dev.ovpn", "-test.ovpn" };
+            foreach(var extention in extrntions)
             {
-                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
-
-                byte[] file;
-                if(File.Exists(filePath))
+                try
                 {
-                    using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + extention);
+
+                    byte[] file;
+                    if (File.Exists(filePath))
                     {
-                        using (var reader = new BinaryReader(stream))
+                        using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                         {
-                            file = reader.ReadBytes((int)stream.Length);
+                            using (var reader = new BinaryReader(stream))
+                            {
+                                file = reader.ReadBytes((int)stream.Length);
+                            }
                         }
+
+                        await _blobDataRepository.UpdateBlobAsync(file, userName, ip, creds + extention);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"File {creds + extention} does not exist. Path:" + filePath);
                     }
 
-                    await _blobDataRepository.UpdateBlobAsync(file, userName, ip, creds + ".p12");
                 }
-                else
+                catch (Exception e)
                 {
-                    Console.WriteLine("File does not exist. Path:" + filePath);
+                    Console.WriteLine(e);
                 }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
+            } 
         }
 
         public string GetCertPass(string creds)

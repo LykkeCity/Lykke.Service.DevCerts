@@ -34,7 +34,7 @@
                         '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
                         '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
                         '<td class="col-md-3" class="viewMode" >' +
-                        (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default generate">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default download">Download</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default revoke">Revoke</a>' + '<span>&nbsp;&nbsp;</span>' + '<a href="javascript:;" class="btn  btn-md btn-default change-pass">New pass</a>') +
+                        (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default generate">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default download">Certificate</a>' + '<a href="javascript:;" class="btn  btn-md btn-default download-dev">Dev Ovpn</a>' + '<a href="javascript:;" class="btn  btn-md btn-default download-test">Test Ovpn</a>' +  '<a href="javascript:;" class="btn  btn-md btn-default revoke">Revoke</a>' +  '<a href="javascript:;" class="btn  btn-md btn-default change-pass">New pass</a>') +
                         '</td>' +
                         '</tr>';
 
@@ -76,7 +76,21 @@
                 $('.download').click(function () {
                     var elemId = $(this).parents('tr').attr('elemId');
 
-                    var url = 'GetCertificates/'+ elemId;
+                    var url = 'GetCertificates/'+ elemId + '/ext.p12';
+                    window.open(url, "_blank");
+                });
+
+                $('.download-dev').click(function () {
+                    var elemId = $(this).parents('tr').attr('elemId');
+
+                    var url = 'GetCertificates/' + elemId + '/ext-dev.ovpn';
+                    window.open(url, "_blank");
+                });
+
+                $('.download-test').click(function () {
+                    var elemId = $(this).parents('tr').attr('elemId');
+
+                    var url = 'GetCertificates/' + elemId + '/ext-test.ovpn';
                     window.open(url, "_blank");
                 });
 

@@ -7,41 +7,51 @@
 <div class="row">
     @if (!Model.CertIsRevoked)
     {
+        <div class="col-md-12">
+
+            <div class="col-md-6">
+                <h2>Download certificate:</h2>
+                <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download">Download</button>
+                <br />
+                <br />
+                <h2>Download Dev env. VPN config:</h2>
+                <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download-dev">Download</button>
+                <br />
+                <br />                <br />
+                <h2>Download Test env. VPN config:</h2>
+                <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download-test">Download</button>
+            </div>
 
 
-        <div class="col-md-6">
-            <h2>Download certificate</h2>
-            <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download">Download</button>
-            <br />
-            <h3>Instructions:</h3>
-            <p><a href="https://lykkex.atlassian.net/wiki/spaces/MAINTAIN/pages/523436136/How+to+import+a+certificate+for+access+to+Web+resources">How to import a certificate for access to Web resources</a></p>
-        </div>
-
-
-        <div class="col-md-6">
-            <h2>Your password</h2>
-            <div class="form-group has-feedback">
-                <div id="wrapper">
-                    @if (Model.CertPassword != "No password file")
-                    {
-                        <div class="col-md-7 ">
-                            <div class="input-group">
-                                <input type="password" value="@Model.CertPassword" class="form-control pwd" id="pwd" readonly>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default copy" type="button" data-toggle="tooltip" title="Copy password"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
-                                    <button class="btn btn-default reveal" type="button" data-toggle="tooltip" title="Show/hide password"><i class="glyphicon glyphicon-eye-open"></i></button>
-                                </span>
+            <div class="col-md-6">
+                <h2>Your password</h2>
+                <div class="form-group has-feedback">
+                    <div id="wrapper">
+                        @if (Model.CertPassword != "No password file")
+                        {
+                            <div class="col-md-7 ">
+                                <div class="input-group">
+                                    <input type="password" value="@Model.CertPassword" class="form-control pwd" id="pwd" readonly>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default copy" type="button" data-toggle="tooltip" title="Copy password"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
+                                        <button class="btn btn-default reveal" type="button" data-toggle="tooltip" title="Show/hide password"><i class="glyphicon glyphicon-eye-open"></i></button>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
 
-                    }
-                    else
-                    {
-                        <div class="col-md-8">
-                            <input type="text" value="@Model.CertPassword" class="form-control pwd" id="pwd" readonly>
-                        </div>
-                    }
-                    <div class="col-md-4"><button type="button" class="btn btn-primary change-pass" id="showPwd" data-toggle="modal">Generate new password</button></div>
+                        }
+                        else
+                        {
+                            <div class="col-md-8">
+                                <input type="text" value="@Model.CertPassword" class="form-control pwd" id="pwd" readonly>
+                            </div>
+                        }
+                        <div class="col-md-4"><button type="button" class="btn btn-primary change-pass" id="showPwd" data-toggle="modal">Generate new password</button></div>
+                        <br />
+                        <br />
+                        <h2>Instructions:</h2>
+                        <p><a href="https://lykkex.atlassian.net/wiki/spaces/MAINTAIN/pages/523436136/How+to+import+a+certificate+for+access+to+Web+resources">How to import a certificate for access to Web resources</a></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,9 +97,20 @@
             });
 
             $('#download').click(function () {
-                var url = '@this.Url.Action("GetCert", "Home")';
+                var url = '@this.Url.Action("GetCert", "Home")' + '/ext.p12';
                 window.open(url, "_blank");
             });
+
+            $('#download-dev').click(function () {
+                var url = '@this.Url.Action("GetCert", "Home")' + '/ext-dev.ovpn';
+                window.open(url, "_blank");
+            });
+
+            $('#download-test').click(function () {
+                var url = '@this.Url.Action("GetCert", "Home")' + '/ext-test.ovpn';
+                window.open(url, "_blank");
+            });
+
 
             $('.change-pass').click(function () {
                 var $btn = $(this);
