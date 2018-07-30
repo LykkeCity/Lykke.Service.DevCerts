@@ -88,12 +88,12 @@ namespace Lykke.Service.DevCerts.Code
                                             break;
                                     }
                                 }
-                                string creds;
+                                string creds = "";
                                 if (userEntity != null && userEntity.Email.Contains('@'))
                                 {
                                     creds = userEntity.Email.Substring(0, userEntity.Email.IndexOf('@'));
                                 }
-                                else
+                                else if(userEntity != null)
                                 {
                                     creds = userEntity.Email;
                                 }
