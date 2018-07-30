@@ -28,6 +28,9 @@
                     '<table class="table table-stripped table-bordered"><tr><th>Email</th><th>Password</th><th>Date</th><th>Revoked</th><th>Actions</th></tr>';
                 for (var i = 0; i < list.length; i++) {
                     var elem = list[i];
+                    if (!elem.Visible)
+                        continue;
+
                     html += '<tr elemId="' + elem.RowKey + '"> ' +
                         '<td class="col-md-2"><span class="viewMode" class = "name-cert" >' + elem.Email + '</span></td>' +
                         '<td class="col-md-3"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' : 'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '" readonly><span class="input-group-btn"> ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? '' : '<button class="btn btn-default copy" type="button" data-toggle="tooltip" title="Copy password"><i class="glyphicon glyphicon glyphicon-copy"></i></button>') + '<button class="btn btn-default reveal" type="button" data-toggle="tooltip" title="Show/hide password"><i class="glyphicon ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'glyphicon-eye-open' :'glyphicon-eye-close') + '"></i></button></span></div>' + '</span></td>' +
@@ -105,8 +108,8 @@
 
                             $.post(url, elemId, function (data) {
                                 $btn.removeClass('disabled');
-                                window.alert('Certificate revoked.');
                                 $.generateTable(data.Json);
+                                window.alert('Certificate revoked.');
                             });
                         }
                     }
@@ -123,8 +126,8 @@
 
                             $.post(url, elemId, function (data) {
                                 $btn.removeClass('disabled');
-                                window.alert('Password changed.');
                                 $.generateTable(data.Json);
+                                window.alert('Password changed.');
                             });
                         }
                     }
@@ -141,8 +144,8 @@
 
                             $.post(url, elemId, function (data) {
                                 $btn.removeClass('disabled');
-                                window.alert('New certificate was generated.');
                                 $.generateTable(data.Json);
+                                window.alert('New certificate was generated.');
                             });
                         }
                     }
@@ -160,8 +163,8 @@
 
                     $.post(url, elemId, function (data) {
                         $btn.removeClass('disabled');
-                        window.alert('DB was updated.');
                         $.generateTable(data.Json);
+                        window.alert('DB was updated.');
                     });
                 }
             }

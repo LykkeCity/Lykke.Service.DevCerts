@@ -88,8 +88,17 @@ namespace Lykke.Service.DevCerts.Code
                                             break;
                                     }
                                 }
+                                string creds;
+                                if (userEntity != null && userEntity.Email.Contains('@'))
+                                {
+                                    creds = userEntity.Email.Substring(0, userEntity.Email.IndexOf('@'));
+                                }
+                                else
+                                {
+                                    creds = userEntity.Email;
+                                }
 
-                                if (userEntity!=null && user.Email == userEntity.Email.Substring(0, userEntity.Email.IndexOf('@')))
+                                if (userEntity!=null && user.Email == creds)
                                 {
                                     userEntityList.Add(user);
                                 }
@@ -117,13 +126,12 @@ namespace Lykke.Service.DevCerts.Code
                     if (userEntityList.Count > 0)
                     {
                         var sortedlist = userEntityList.OrderByDescending(u => (bool)u.CertIsRevoked ? u.RevokeDate.Value.ToUniversalTime() : u.CertDate.Value.ToUniversalTime());
-                        var userToSave = sortedlist.FirstOrDefault();
-
-                        userToSave.HasCert = true;
-                        userToSave.CertPassword = Crypto.EncryptStringAES(GetCertPass(userToSave.Email), _appSettings.DevCertsService.EncryptionPass);
+                        var userToSave = sortedlist.FirstOrDefault();                                              
 
                         if (!(bool)userToSave.CertIsRevoked)
                         {
+                            userToSave.HasCert = true;
+                            userToSave.CertPassword = Crypto.EncryptStringAES(GetCertPass(userToSave.Email), _appSettings.DevCertsService.EncryptionPass);
                             await UpoadCertToBlob(userToSave.Email, "Lykke.Service.DevCerts", "localhost");
                         }
 
@@ -251,6 +259,7 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task RevokeUser(IUserEntity user, string userName, string ip)
         {
+            await _userRepository.SaveUser(user);
             string creds = "";
             if (user.Email.Contains('@'))
                 creds = user.Email.Substring(0, user.Email.IndexOf('@'));
@@ -279,6 +288,9 @@ namespace Lykke.Service.DevCerts.Code
                     Console.WriteLine(e);
                 }
             }
+
+
+
             await UpdateDb(false, user);
 
         }

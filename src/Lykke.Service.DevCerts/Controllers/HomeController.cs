@@ -224,6 +224,7 @@ namespace Lykke.Service.DevCerts.Controllers
                              Admin = uc.Admin ?? false,
                              CertPassword =  String.IsNullOrWhiteSpace(uc.CertPassword) ? "No password file" : Crypto.DecryptStringAES(uc.CertPassword, _appSettings.DevCertsService.EncryptionPass),
                              HasCert = uc.HasCert ?? false,
+                             Visible = uc.Visible ?? true,
                              RevokeDate = (uc.RevokeDate ?? DateTime.MinValue).ToString("dd/MM/yyyy HH:mm:ss"),
                          }).ToList();
 
