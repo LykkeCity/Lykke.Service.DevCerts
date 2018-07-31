@@ -30,6 +30,8 @@ namespace Lykke.Service.DevCerts.Code
             {
                 Console.WriteLine(ex);
             }
+            if(!escapedArgs.Contains(" cat "))
+                Console.WriteLine(result);
             return result;
         }
     }

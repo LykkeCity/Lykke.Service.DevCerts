@@ -114,7 +114,7 @@ namespace Lykke.Service.DevCerts.Controllers
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 try
                 {
-                    var creds = userData.Email.Substring(0, userData.Email.IndexOf('@'));
+                    var creds = userData.Email.Contains('@') ? userData.Email.Substring(0, userData.Email.IndexOf('@')): userData.Email;
                     var fileName = creds + ext;
                     var blob = await _blobDataRepository.GetDataAsync(fileName);
                     Stream blobStream = blob.AsStream();
