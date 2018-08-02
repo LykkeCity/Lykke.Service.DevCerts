@@ -15,6 +15,8 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
         public bool? HasCert { get; set; }
         public bool? Admin { get; set; }
         public bool? Visible { get; set; }
+        public bool? DevAccess { get; set; }
+        public bool? TestAccess { get; set; }
         public bool? CertIsRevoked { get; set; }
 
         public static string GeneratePartitionKey() => "U";
@@ -58,6 +60,16 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
                 Visible = visible.BooleanValue;
             }
 
+            if (properties.TryGetValue("DevAccess", out var devAccess))
+            {
+                DevAccess = devAccess.BooleanValue;
+            }
+
+            if (properties.TryGetValue("TestAccess", out var testAccess))
+            {
+                TestAccess = testAccess.BooleanValue;
+            }
+
             if (properties.TryGetValue("CertIsRevoked", out var certIsRevoked))
             {
                 CertIsRevoked = certIsRevoked.BooleanValue;
@@ -75,6 +87,8 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
                 {"RevokeDate", new EntityProperty(RevokeDate)},
                 {"HasCert", new EntityProperty(HasCert)},
                 {"Admin", new EntityProperty(Admin)},
+                {"DevAccess", new EntityProperty(DevAccess)},
+                {"TestAccess", new EntityProperty(TestAccess)},
                 {"Visible", new EntityProperty(Visible)},
                 {"CertIsRevoked", new EntityProperty(CertIsRevoked)},
             };

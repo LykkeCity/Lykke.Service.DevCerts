@@ -36,8 +36,16 @@
                         '<td class="col-md-3"><span class="viewMode">' + '<div class="input-group"><input type="' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'text' : 'password') + '" class="form-control pwd" value="' + (elem.CertIsRevoked == true ? 'Revoked' : elem.CertPassword) + '" readonly><span class="input-group-btn"> ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? '' : '<button class="btn btn-default copy" type="button" data-toggle="tooltip" title="Copy password"><i class="glyphicon glyphicon glyphicon-copy"></i></button>') + '<button class="btn btn-default reveal" type="button" data-toggle="tooltip" title="Show/hide password"><i class="glyphicon ' + (elem.CertIsRevoked == true || elem.CertPassword === "No password file" ? 'glyphicon-eye-open' :'glyphicon-eye-close') + '"></i></button></span></div>' + '</span></td>' +
                         '<td class="col-md-2"><span class="viewMode">' + (elem.CertIsRevoked ? elem.RevokeDate : elem.CertDate) + '</span></td>' +
                         '<td class="col-md-1"><span class="viewMode">' + elem.CertIsRevoked + '</span></td>' +
-                        '<td class="col-md-3" class="viewMode" >' +
-                        (elem.CertIsRevoked == true ? '<a href="javascript:;" class="btn  btn-md btn-default generate">Generate new</a>' : '<a href="javascript:;" class="btn  btn-md btn-default download">Certificate</a>' + '<a href="javascript:;" class="btn  btn-md btn-default download-dev">Dev Ovpn</a>' + '<a href="javascript:;" class="btn  btn-md btn-default download-test">Test Ovpn</a>' +  '<a href="javascript:;" class="btn  btn-md btn-default revoke">Revoke</a>' +  '<a href="javascript:;" class="btn  btn-md btn-default change-pass">New pass</a>') +
+                        '<td class="col-md-4" class="viewMode" >' +
+                        (elem.CertIsRevoked == true ?
+                            '<a href="javascript:;" data-toggle="tooltip" title="Generate new certificate" class="btn  btn-md btn-default generate">Generate new</a>'
+                        : '<a href="javascript:;" data-toggle="tooltip" title="Download user certificate" class="btn  btn-md btn-default download">Certificate</a>' +
+                            '<a href="javascript:;" data-toggle="tooltip" title="Download .ovpn cert for Dev" class="btn  btn-md btn-default download-dev">Dev Ovpn</a>' +
+                            '<a href="javascript:;" data-toggle="tooltip" title="Download .ovpn cert for Test" class="btn  btn-md btn-default download-test">Test Ovpn</a>' +
+                            '<a href="javascript:;" data-toggle="tooltip" title="Revoke certificate" class="btn  btn-md btn-default revoke">Revoke</a>' +
+                            '<a href="javascript:;" data-toggle="tooltip" title="Generate new password" class="btn  btn-md btn-default change-pass">New pass</a>' +
+                        '<a href="javascript:;" data-toggle="tooltip" title="Gain/deny Dev access" class="btn ' + (elem.DevAccess ? 'green' :'red' ) + ' btn-md btn-default dev-access">Dev Access</a>' +
+                        '<a href="javascript:;" data-toggle="tooltip" title="Gain/deny Test access" class="btn ' + (elem.TestAccess ? 'green' : 'red') + ' btn-md btn-default test-access">Test Access</a>') +
                         '</td>' +
                         '</tr>';
 
@@ -110,6 +118,31 @@
                                 $btn.removeClass('disabled');
                                 $.generateTable(data.Json);
                                 window.alert('Certificate revoked.');
+                            });
+                        }
+                    }
+                });
+
+                $('.dev-access, .test-access').click(function () {
+                    var $btn = $(this);
+                    var $isDiv = ''
+                    if ($btn.hasClass('dev-access')) {
+                        $isDiv = 'dev';
+                    }
+                    else {
+                        $isDiv = 'test';
+                    }
+                    if (!$btn.hasClass('disabled')) {
+                        $btn.addClass('disabled');
+                        var elemId = $(this).parents('tr').attr('elemId');
+
+                        if (confirm('Access will be changed.')) {
+                            var url = 'GraintAccess/' + elemId + '/' + $isDiv;
+
+                            $.post(url, elemId, function (data) {
+                                $btn.removeClass('disabled');
+                                $.generateTable(data.Json);
+                                window.alert('Access changed.');
                             });
                         }
                     }

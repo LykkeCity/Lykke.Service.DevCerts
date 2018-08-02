@@ -14,5 +14,6 @@ namespace Lykke.Service.DevCerts.Services
         Task GenerateCertAsync(IUserEntity user, string userName, string ip);
         Task RevokeUser(IUserEntity user, string userName, string ip);
         Task ChangePass(IUserEntity user, string userName, string ip);
+        Task GraintAccess(IUserEntity user, string isDev);
     }
 }

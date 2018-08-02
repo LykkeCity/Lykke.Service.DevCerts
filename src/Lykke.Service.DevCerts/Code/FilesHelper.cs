@@ -37,6 +37,9 @@ namespace Lykke.Service.DevCerts.Code
                 var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db");
                 filePath = Path.Combine(filePath, "index.txt");
 
+                var devFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"..\" + "ccd_dev"); 
+                var testFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"..\" + "ccd_test");
+
                 if (force || LastTimeDbModified.ToUniversalTime() <= File.GetCreationTimeUtc(filePath) && File.Exists(filePath))
                 {
 
@@ -104,16 +107,23 @@ namespace Lykke.Service.DevCerts.Code
                                 }
                                 else
                                 {
-                                    user.HasCert = true;
 
+                                    user.HasCert = true;
+                                    user.DevAccess = File.Exists(Path.Combine(devFolder, user.Email));
+                                    user.TestAccess = File.Exists(Path.Combine(testFolder, user.Email));
                                     user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
 
                                     var userInCloud = await _userRepository.GetUserByUserEmail(user.Email);
 
                                     if (userInCloud == null || force )
                                     {
-                                        await UpoadCertToBlob(user.Email, "Lykke.Service.DevCerts", "localhost");
 
+                                        await UpoadCertToBlob(user.Email, "Lykke.Service.DevCerts", "localhost");                                        
+                                    }
+
+                                    if (userInCloud != null)
+                                    {
+                                        user.Email = userInCloud.Email;
                                     }
 
                                     await _userRepository.SaveUser(user);
@@ -130,9 +140,20 @@ namespace Lykke.Service.DevCerts.Code
 
                         if (!(bool)userToSave.CertIsRevoked)
                         {
+                            userToSave.DevAccess = File.Exists(Path.Combine(devFolder, userToSave.Email));
+                            userToSave.TestAccess = File.Exists(Path.Combine(testFolder, userToSave.Email));
+
                             userToSave.HasCert = true;
                             userToSave.CertPassword = Crypto.EncryptStringAES(GetCertPass(userToSave.Email), _appSettings.DevCertsService.EncryptionPass);
+
                             await UpoadCertToBlob(userToSave.Email, "Lykke.Service.DevCerts", "localhost");
+                        }
+
+                        var userInCloud = await _userRepository.GetUserByUserEmail(userToSave.Email);
+
+                        if (userInCloud != null)
+                        {
+                            userToSave.Email = userInCloud.Email;
                         }
 
                         await _userRepository.SaveUser(userToSave);
@@ -231,6 +252,52 @@ namespace Lykke.Service.DevCerts.Code
             shell.Bash();
 
             Console.WriteLine("Change pass for " + creds);
+
+            await UpdateDb(false, user);
+        }
+
+        public async Task GraintAccess(IUserEntity user, string isDev)
+        {
+            string creds = "";
+            if (user.Email.Contains('@'))
+                creds = user.Email.Substring(0, user.Email.IndexOf('@'));
+            else
+                creds = user.Email;
+
+            var folder = "";
+            if (isDev == "dev")
+                folder = "ccd_dev";
+            else
+                folder = "ccd_test";
+
+            var fileFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"..\" + folder);
+
+            var yesFilePath = Path.Combine(fileFolder, creds);
+            var noFilePath = Path.Combine(fileFolder, "no-" + creds);            
+
+            if (File.Exists(yesFilePath))
+            {
+                File.Move(yesFilePath, noFilePath);
+                Console.WriteLine($"Deny access file to {isDev} for {creds}");
+            }
+            else if (File.Exists(noFilePath))
+            {
+                File.Move(noFilePath, yesFilePath);
+                Console.WriteLine($"Grant access file to {isDev} for {creds}");
+            }
+            else
+            {
+                var shell = "";
+
+                if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
+                {
+                    shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
+                }
+
+                shell += "./ip-addr.sh " + creds;
+                Console.WriteLine($"Creating access file to {isDev} for {creds}");
+                shell.Bash();
+            }
 
             await UpdateDb(false, user);
         }

@@ -60,3 +60,21 @@ div.fullscreen {
 .alert {
     display: none;
 }
+.red {
+    background-color:firebrick;
+    color:azure;     
+}
+    .red:hover {
+        background-color: lightcoral;
+        color: azure;
+    }
+
+
+.green {
+    background-color: forestgreen;
+    color: azure
+}
+    .green:hover {
+        background-color: lightgreen;
+        color: azure;
+    }

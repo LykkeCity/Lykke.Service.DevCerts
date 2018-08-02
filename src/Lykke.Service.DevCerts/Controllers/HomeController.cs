@@ -145,6 +145,20 @@ namespace Lykke.Service.DevCerts.Controllers
         }
 
         [HttpPost]
+        [Route("Home/GraintAccess/{rowKey}/{isDev}")]
+        public async Task<IActionResult> GraintAccess(string rowKey, string isDev)
+        {
+            if (HttpContext.IsAdmin())
+            {
+                var userData = await _userRepository.GetUserByRowKey(rowKey);
+                await _filesHelper.GraintAccess(userData, isDev);
+            }
+            var users = await GetAllUsers();
+            return new JsonResult(new { Json = JsonConvert.SerializeObject(users) });
+
+        }
+
+        [HttpPost]
         [Route("Home/ChangePass/{rowKey}")]
         public async Task<IActionResult> ChangePass(string rowKey)
         {
@@ -224,6 +238,8 @@ namespace Lykke.Service.DevCerts.Controllers
                              Admin = uc.Admin ?? false,
                              CertPassword =  String.IsNullOrWhiteSpace(uc.CertPassword) ? "No password file" : Crypto.DecryptStringAES(uc.CertPassword, _appSettings.DevCertsService.EncryptionPass),
                              HasCert = uc.HasCert ?? false,
+                             DevAccess = uc.DevAccess ?? true,
+                             TestAccess = uc.TestAccess ?? true,
                              Visible = uc.Visible ?? true,
                              RevokeDate = (uc.RevokeDate ?? DateTime.MinValue).ToString("dd/MM/yyyy HH:mm:ss"),
                          }).ToList();

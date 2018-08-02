@@ -10,6 +10,8 @@ namespace Lykke.Service.DevCerts.Models
         public string CertDate { get; set; }
         public string RevokeDate { get; set; }
         public bool HasCert { get; set; }
+        public bool TestAccess { get; set; }
+        public bool DevAccess { get; set; }
         public bool Admin { get; set; }
         public bool Visible { get; set; }
         public bool CertIsRevoked { get; set; }

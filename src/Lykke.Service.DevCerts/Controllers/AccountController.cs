@@ -92,7 +92,12 @@ namespace Lykke.Service.DevCerts.Controllers
 
                 if (user == null)
                 {
-                    user = new UserEntity() { Email = webSignature.Email, Admin = false, Visible = true };
+                    user = new UserEntity() { Email = webSignature.Email, Admin = false, Visible = true, TestAccess = false, DevAccess = false };
+                    await _userRepository.SaveUser(user);
+                }
+                else
+                {
+                    user.Email = webSignature.Email;
                     await _userRepository.SaveUser(user);
                 }
 

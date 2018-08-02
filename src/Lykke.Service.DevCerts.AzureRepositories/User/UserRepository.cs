@@ -19,7 +19,12 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
         public async Task<IUserEntity> GetUserByUserEmail(string userEmail)
         {
             var Users = await GetUsers();
-            return Users.Where(u => u.Email.Contains(userEmail)).OrderByDescending(u => u.CertDate).FirstOrDefault();
+            string creds = "";
+            if (userEmail.Contains('@'))
+                creds = userEmail.Substring(0, userEmail.IndexOf('@'));
+            else
+                creds = userEmail;
+            return Users.Where(u => u.Email.Contains(creds)).OrderByDescending(u => u.CertDate).FirstOrDefault();
         }
 
         public async Task<IUserEntity> GetUserByRowKey(string RowKey)
@@ -31,7 +36,6 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
         {
             try
             {
-
                 var userEntity = await GetUserByUserEmail(user.Email);
                 var te = (UserEntity)user;
                 if (userEntity == null)
@@ -40,7 +44,7 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
                 }
                 else
                 {
-                    te.Email = userEntity.Email;
+                    te.Email = user.Email;
                     te.RowKey = userEntity.RowKey;
                 }
 
