@@ -288,14 +288,14 @@ namespace Lykke.Service.DevCerts.Code
             else
             {
                 var shell = "";
-
+                Console.WriteLine($"Creating access file to {isDev} for {creds}");
                 if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
                 {
                     shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
                 }
 
-                shell += "./ip-addr.sh " + creds;
-                Console.WriteLine($"Creating access file to {isDev} for {creds}");
+                shell += $"./ip-addr.sh {isDev} {creds}";
+                
                 shell.Bash();
             }
 

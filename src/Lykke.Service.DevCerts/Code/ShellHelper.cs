@@ -8,6 +8,8 @@ namespace Lykke.Service.DevCerts.Code
         public static string Bash(this string cmd)
         {
             var escapedArgs = cmd.Replace("\\", "");
+            if (!escapedArgs.Contains(" cat "))
+                Console.WriteLine(escapedArgs);
             string result = "";
             try
             {
