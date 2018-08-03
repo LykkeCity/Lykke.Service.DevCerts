@@ -120,8 +120,7 @@
                     if (confirm('Password will be changed.')) {
                         var url = '@this.Url.Action("ChangePassForUser", "Home", new { rowKey = Model.RowKey })';
                         console.log(url);
-                        $.post(url, elemId, function (data) {
-                            $btn.removeClass('disabled');
+                        $.post(url, elemId, function (data) {                            
                             window.alert('Password changed. Please download updated certificate also.');
                             var pass = eval('( ' + data.Json + ')');
                             var pwd = document.getElementsByClassName('pwd');
@@ -129,6 +128,7 @@
 
                         });
                     }
+                    $btn.removeClass('disabled');
                 }
             });
         });
