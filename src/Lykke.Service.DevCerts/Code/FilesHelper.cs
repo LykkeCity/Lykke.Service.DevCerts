@@ -37,8 +37,8 @@ namespace Lykke.Service.DevCerts.Code
                 var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db");
                 filePath = Path.Combine(filePath, "index.txt");
 
-                var devFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"..\" + "ccd_dev"); 
-                var testFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"..\" + "ccd_test");
+                var devFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"../" + "ccd_dev"); 
+                var testFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"../" + "ccd_test");
 
                 if (force || LastTimeDbModified.ToUniversalTime() <= File.GetCreationTimeUtc(filePath) && File.Exists(filePath))
                 {
@@ -270,7 +270,7 @@ namespace Lykke.Service.DevCerts.Code
             else
                 folder = "ccd_test";
 
-            var fileFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"..\" + folder);
+            var fileFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"../" + folder);
 
             var yesFilePath = Path.Combine(fileFolder, creds);
             var noFilePath = Path.Combine(fileFolder, "no-" + creds);            
@@ -285,19 +285,7 @@ namespace Lykke.Service.DevCerts.Code
                 File.Move(noFilePath, yesFilePath);
                 Console.WriteLine($"Grant access file to {isDev} for {creds}");
             }
-            else
-            {
-                var shell = "";
-                Console.WriteLine($"Creating access file to {isDev} for {creds}");
-                if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
-                {
-                    shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
-                }
-
-                shell += $"./ip-addr.sh {isDev} {creds}";
-                
-                shell.Bash();
-            }
+            
 
             await UpdateDb(false, user);
         }
