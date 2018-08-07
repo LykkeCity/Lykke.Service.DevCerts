@@ -53,6 +53,7 @@ namespace Lykke.Service.DevCerts.Code
                     var NowMD5Hash = CalculateMD5(filePath);
                     if (LastMD5Hash != NowMD5Hash)
                     {
+                        Console.WriteLine("Starting reparce..." + DateTime.Now.ToLongTimeString());
                         var usersInCloud = await _userRepository.GetUsers();
                         var userEntityList = new List<IUserEntity>();
 
@@ -147,13 +148,13 @@ namespace Lykke.Service.DevCerts.Code
                                     user.CertMD5 = CalculateMD5(path);
                                 }
 
-                                if (userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue && user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
+                                if (userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue && user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
                                 {
                                     await _userRepository.SaveUser(user);
                                 };
                             }
                         }
-
+                        Console.WriteLine("Finished reparce..." + DateTime.Now.ToLongTimeString());
                         LastMD5Hash = NowMD5Hash;
                     }
                 }
