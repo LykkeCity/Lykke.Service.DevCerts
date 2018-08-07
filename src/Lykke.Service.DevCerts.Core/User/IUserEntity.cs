@@ -7,7 +7,9 @@ namespace Lykke.Service.DevCerts.Core.User
         string Email { get; set; }
         bool? HasCert { get; set; }
         bool? Admin { get; set; }
+        bool? Visible { get; set; }
         string CertPassword { get; set; }
+        string CertMD5 { get; set; }
         DateTime? CertDate { get; set; }
         DateTime? RevokeDate { get; set; }
         bool? CertIsRevoked { get; set; }

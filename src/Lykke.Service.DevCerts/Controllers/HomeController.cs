@@ -2,6 +2,7 @@
 using Lykke.Service.DevCerts.Code;
 using Lykke.Service.DevCerts.Core.Blob;
 using Lykke.Service.DevCerts.Core.User;
+using Lykke.Service.DevCerts.Extensions;
 using Lykke.Service.DevCerts.Models;
 using Lykke.Service.DevCerts.Services;
 using Lykke.Service.DevCerts.Settings;
@@ -65,8 +66,7 @@ namespace Lykke.Service.DevCerts.Controllers
                 CertIsRevoked = user.CertIsRevoked.HasValue ? (bool)user.CertIsRevoked : false,
                 CertPassword = pass
             });
-        }
-                
+        }                
 
         [HttpGet]
         [Route("Home/ManageUsers")]
@@ -79,7 +79,6 @@ namespace Lykke.Service.DevCerts.Controllers
                 Users = users,
             });
         }
-
 
         [HttpGet]
         [Route("Home/GetCert")]
@@ -105,9 +104,8 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/GetCertificates/{rowKey}")]
         public async Task<FileStreamResult> GetCertificates(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
 
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 try
@@ -131,54 +129,51 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/RevokeCert/{rowKey}")]
         public async Task<IActionResult> RevokeCert(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
 
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 await _filesHelper.RevokeUser(userData, UserInfo.UserName,UserInfo.Ip);               
             }
             var users = await GetAllUsers();
             return new JsonResult(new { Json = JsonConvert.SerializeObject(users) });
-
         }
 
         [HttpPost]
         [Route("Home/ChangePass/{rowKey}")]
         public async Task<IActionResult> ChangePass(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 await _filesHelper.ChangePass(userData, UserInfo.UserName,UserInfo.Ip);               
             }
             var users = await GetAllUsers();
             return new JsonResult(new { Json = JsonConvert.SerializeObject(users) });
-
         }
 
         [HttpPost]
         [Route("Home/ChangePassForUser/{rowKey}")]
         public async Task<IActionResult> ChangePassForUser(string rowKey)
         {
-            var userData = await _userRepository.GetUserByRowKey(rowKey);
-            await _filesHelper.ChangePass(userData, UserInfo.UserName, UserInfo.Ip);
-
-            userData = await _userRepository.GetUserByRowKey(rowKey);
             var pass = "";
-
-            try
+            if (HttpContext.IsAdmin())
             {
-                pass = Crypto.DecryptStringAES(userData.CertPassword, _appSettings.DevCertsService.EncryptionPass);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                pass = "No password file";
-            }
+                var userData = await _userRepository.GetUserByRowKey(rowKey);
+                await _filesHelper.ChangePass(userData, UserInfo.UserName, UserInfo.Ip);
 
+                userData = await _userRepository.GetUserByRowKey(rowKey);
+
+                try
+                {
+                    pass = Crypto.DecryptStringAES(userData.CertPassword, _appSettings.DevCertsService.EncryptionPass);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    pass = "No password file";
+                }
+            }
             return new JsonResult(new { Json = JsonConvert.SerializeObject(pass) });
 
         }
@@ -187,9 +182,7 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/Reparse")]
         public async Task<IActionResult> Reparse(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 await _filesHelper.UpdateDb(true);
             }
@@ -201,9 +194,7 @@ namespace Lykke.Service.DevCerts.Controllers
         [Route("Home/GenerateNew/{rowKey}")]
         public async Task<IActionResult> GenerateNew(string rowKey)
         {
-            var user = await _userRepository.GetUserByUserEmail(HttpContext.User.Identity.Name);
-
-            if ((bool)user.Admin)
+            if (HttpContext.IsAdmin())
             {
                 var userData = await _userRepository.GetUserByRowKey(rowKey);
                 await _filesHelper.GenerateCertAsync(userData, UserInfo.UserName, UserInfo.Ip);
@@ -229,6 +220,7 @@ namespace Lykke.Service.DevCerts.Controllers
                              Admin = uc.Admin ?? false,
                              CertPassword =  String.IsNullOrWhiteSpace(uc.CertPassword) ? "No password file" : Crypto.DecryptStringAES(uc.CertPassword, _appSettings.DevCertsService.EncryptionPass),
                              HasCert = uc.HasCert ?? false,
+                             Visible = uc.Visible ?? true,
                              RevokeDate = (uc.RevokeDate ?? DateTime.MinValue).ToString("dd/MM/yyyy HH:mm:ss"),
                          }).ToList();
 

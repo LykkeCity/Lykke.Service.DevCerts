@@ -8,13 +8,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Lykke.Service.DevCerts.Code
 {
     public class FilesHelper: IFilesHelper
     {
-        public static DateTime LastTimeDbModified = new DateTime();
+        public static string LastMD5Hash = "";
         private readonly AppSettings _appSettings;
         private readonly IUserRepository _userRepository;
         private readonly IBlobDataRepository _blobDataRepository;
@@ -30,108 +31,141 @@ namespace Lykke.Service.DevCerts.Code
             UpdateDb();
         }
 
-        public async Task UpdateDb(bool force = false, IUserEntity userEntity = null)
+        public async Task UpdateDb(bool force = false)
         {
             try
             {
                 var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, "db");
                 filePath = Path.Combine(filePath, "index.txt");
-
-                if (force || LastTimeDbModified.ToUniversalTime() <= File.GetCreationTimeUtc(filePath))
+                if (!File.Exists(filePath))
                 {
-
-                    string lineOfText = "";
-
-                    var userEntityList = new List<IUserEntity>();
-
-                    using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    var shell = "";
+                    if (!String.IsNullOrWhiteSpace(_appSettings.DevCertsService.PathToScriptFolder))
                     {
-                        using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8, true, 128))
+                        shell += "cd " + _appSettings.DevCertsService.PathToScriptFolder + " && ";
+                    }
+                    shell += "./create.sh ";
+
+                    shell.Bash();
+                }
+                else
+                {
+                    var NowMD5Hash = CalculateMD5(filePath);
+                    if (LastMD5Hash != NowMD5Hash)
+                    {
+                        var usersInCloud = await _userRepository.GetUsers();
+                        var userEntityList = new List<IUserEntity>();
+
+                        string lineOfText = "";
+
+                        using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                         {
-                            while ((lineOfText = reader.ReadLine()) != null)
+                            using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8, true, 128))
                             {
-                                var user = new UserEntity();
-                                var line = lineOfText.Split("\t ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                                int offset = 0;
-                                for (int i = 0; i < line.Length; i++)
+                                while ((lineOfText = reader.ReadLine()) != null)
                                 {
-                                    switch (i)
+                                    var user = new UserEntity();
+                                    var line = lineOfText.Split("\t ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                                    int offset = 0;
+                                    for (int i = 0; i < line.Length; i++)
                                     {
-                                        case 0:
-                                            user.CertIsRevoked = line[i] == "V" ? false : true;                                         
-                                            break;
-                                        case 1:
-                                            line[i] = line[i].Substring(0, line[i].Length - 1);
-                                            var dateTill = DateTime.ParseExact(line[i], "yyMMddHHmmss", CultureInfo.InvariantCulture).ToLocalTime();
-                                            dateTill = dateTill.AddYears(-10);
-                                            dateTill = dateTill.AddDays(3);
-                                            user.CertDate = dateTill;
-                                            break;
-                                        case 2:
-                                            if ((bool)user.CertIsRevoked)
-                                            {
+                                        switch (i)
+                                        {
+                                            case 0:
+                                                user.CertIsRevoked = line[i] == "V" ? false : true;
+                                                break;
+                                            case 1:
                                                 line[i] = line[i].Substring(0, line[i].Length - 1);
-                                                user.RevokeDate = DateTime.ParseExact(line[i], "yyMMddHHmmss", CultureInfo.InvariantCulture).ToLocalTime();
-                                                offset = 1;
-                                            }
-                                            var serialNum = line[i + offset];
-                                            break;
-                                        case 4:
-                                            var parameters = line[i + offset].Split('/');
-                                            for (int j = 0; j < parameters.Length; j++)
-                                            {
-                                                if (parameters[j].Contains("CN="))
+                                                var dateTill = DateTime.ParseExact(line[i], "yyMMddHHmmss", CultureInfo.InvariantCulture).ToLocalTime();
+                                                dateTill = dateTill.AddYears(-10);
+                                                dateTill = dateTill.AddDays(3);
+                                                user.CertDate = dateTill;
+                                                break;
+                                            case 2:
+                                                if ((bool)user.CertIsRevoked)
                                                 {
-                                                    user.Email = parameters[j].Remove(0, parameters[j].IndexOf('=') + 1);
+                                                    line[i] = line[i].Substring(0, line[i].Length - 1);
+                                                    user.RevokeDate = DateTime.ParseExact(line[i], "yyMMddHHmmss", CultureInfo.InvariantCulture).ToLocalTime();
+                                                    offset = 1;
                                                 }
-                                            }
-                                            break;
+                                                var serialNum = line[i + offset];
+                                                break;
+                                            case 4:
+                                                var parameters = line[i + offset].Split('/');
+                                                for (int j = 0; j < parameters.Length; j++)
+                                                {
+                                                    if (parameters[j].Contains("CN="))
+                                                    {
+                                                        user.Email = parameters[j].Remove(0, parameters[j].IndexOf('=') + 1);
+                                                    }
+                                                }
+                                                break;
+                                        }
                                     }
+
+                                    var userToAdd = userEntityList.Where(u => u.Email == user.Email).FirstOrDefault();
+                                    if (userToAdd == null)
+                                    {
+                                        userEntityList.Add(user);
+                                    }
+                                    else if (user.CertDate.Value.ToUniversalTime() > userToAdd.CertDate.Value.ToUniversalTime())
+                                    {
+                                        userEntityList.Remove(userToAdd);
+                                        userEntityList.Add(user);
+                                    }
+
                                 }
+                            }
+                        }
 
-                                
+                        if (userEntityList.Count > 0)
+                        {
+                            foreach (var user in userEntityList)
+                            {
+                                user.HasCert = true;
+                                user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
 
-                                if(userEntity!=null && user.Email == userEntity.Email)
+                                string creds = "";
+                                if (user.Email.Contains('@'))
                                 {
-                                    userEntityList.Add(user);
+                                    creds = user.Email.Substring(0, user.Email.IndexOf('@'));
                                 }
                                 else
                                 {
-                                    user.HasCert = true;
-                                    user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
-
-                                    var userInCloud = await _userRepository.GetUserByUserEmail(user.Email);
-                                    
-                                    if (userInCloud == null && !(bool)user.CertIsRevoked)
-                                    {
-                                        await UpoadCertToBlob(user.Email, "Lykke.Service.DevCerts", "localhost");
-                                    }
-
-                                    await _userRepository.SaveUser(user);
+                                    creds = user.Email;
                                 }
 
+                                var userInCloud = usersInCloud.Where(u => u.Email.Contains('@') ? u.Email.Substring(0, u.Email.IndexOf('@')) == creds : u.Email == creds).FirstOrDefault();
+
+
+                                if (userInCloud != null)
+                                {
+                                    user.CertMD5 = userInCloud.CertMD5;
+                                    user.Email = userInCloud.Email;
+                                }
+
+                                if (!(bool)user.CertIsRevoked && (userInCloud == null || force))
+                                {
+                                    await UpoadCertToBlob(user, "Lykke.Service.DevCerts", "localhost");
+                                }
+                                var path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+                                if (!(bool)user.CertIsRevoked && File.Exists(path))
+                                {
+                                    user.CertMD5 = CalculateMD5(path);
+                                }
+
+                                if (userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue && user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
+                                {
+
+                                    await _userRepository.SaveUser(user);
+                                };
                             }
                         }
+
+                        LastMD5Hash = NowMD5Hash;
                     }
-
-                    if (userEntityList.Count > 0)
-                    {
-                        var sortedlist = userEntityList.OrderByDescending(u => (bool)u.CertIsRevoked ? u.RevokeDate.Value.ToUniversalTime() : u.CertDate.Value.ToUniversalTime());
-                        var userToSave = sortedlist.FirstOrDefault();
-
-                        userToSave.HasCert = true;
-                        userToSave.CertPassword = Crypto.EncryptStringAES(GetCertPass(userToSave.Email), _appSettings.DevCertsService.EncryptionPass);
-
-                        if (!(bool)userToSave.CertIsRevoked)
-                        {
-                            await UpoadCertToBlob(userToSave.Email, "Lykke.Service.DevCerts", "localhost");
-                        }
-
-                        await _userRepository.SaveUser(userToSave);
-                    }
-
-                    LastTimeDbModified = File.GetCreationTimeUtc(filePath);
                 }
+                
             }
             catch (Exception e)
             {
@@ -139,23 +173,33 @@ namespace Lykke.Service.DevCerts.Code
             }
         }
 
-        public async Task UpoadCertToBlob(string creds, string userName, string ip)
+        public async Task UpoadCertToBlob(IUserEntity user, string userName, string ip)
         {
             try
             {
-                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
-
-                byte[] file;
-
-                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, user.Email + ".p12");
+                if (File.Exists(filePath))
                 {
-                    using (var reader = new BinaryReader(stream))
-                    {
-                        file = reader.ReadBytes((int)stream.Length);
-                    }
-                }
+                    var fileMd5 = CalculateMD5(filePath);
+                    if (fileMd5 == user.CertMD5)
+                        return;
 
-                await _blobDataRepository.UpdateBlobAsync(file, userName, ip, creds + ".p12");
+                    byte[] file;
+                
+                    using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    {
+                        using (var reader = new BinaryReader(stream))
+                        {
+                            file = reader.ReadBytes((int)stream.Length);
+                        }
+                    }
+
+                    await _blobDataRepository.UpdateBlobAsync(file, userName, ip, user.Email + ".p12");
+                }
+                else
+                {
+                    Console.WriteLine($"File {user.Email}.p12 does not exist. Path:" + filePath);
+                }
             }
             catch (Exception e)
             {
@@ -191,7 +235,6 @@ namespace Lykke.Service.DevCerts.Code
                 pass = "No password file.";
             }
 
-
             return pass.Substring(0, pass.Length - 1);
         }
 
@@ -209,8 +252,17 @@ namespace Lykke.Service.DevCerts.Code
             shell.Bash();
 
             Console.WriteLine("Change pass for " + creds);
+            user.CertPassword = Crypto.EncryptStringAES(GetCertPass(creds), _appSettings.DevCertsService.EncryptionPass);
+            user.CertDate = DateTime.Now.ToUniversalTime();
 
-            await UpdateDb(false, user);
+            await UpoadCertToBlob(user, userName, ip);
+
+            var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+            if (File.Exists(filePath))
+                user.CertMD5 = CalculateMD5(filePath);
+
+            await _userRepository.SaveUser(user);
+            //await UpdateDb(false, user);
         }
 
         public async Task GenerateCertAsync(IUserEntity user, string userName, string ip)
@@ -227,8 +279,21 @@ namespace Lykke.Service.DevCerts.Code
             shell.Bash();
 
             Console.WriteLine("Generate cert for " + creds);
+            user.Visible = true;
+            user.Admin = false;
+            user.HasCert = true;
+            user.CertIsRevoked = false;
+            user.CertPassword = Crypto.EncryptStringAES(GetCertPass(creds), _appSettings.DevCertsService.EncryptionPass);
+            user.CertDate = DateTime.Now.ToUniversalTime();
 
-            await UpdateDb(false, user);
+            await UpoadCertToBlob(user, userName, ip);
+
+            var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+            if (File.Exists(filePath))
+                user.CertMD5 = CalculateMD5(filePath);
+
+            await _userRepository.SaveUser(user);
+            //await UpdateDb(false, user);
         }
 
         public async Task RevokeUser(IUserEntity user, string userName, string ip)
@@ -245,12 +310,32 @@ namespace Lykke.Service.DevCerts.Code
             shell.Bash();
             Console.WriteLine("Revoke user " + creds);
 
-            await _blobDataRepository.DelBlobAsync(creds + ".p12");
+            try
+            {
+                await _blobDataRepository.DelBlobAsync(creds + ".p12");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
-            await UpdateDb(false, user);
+            user.CertIsRevoked = true;
+            user.RevokeDate = DateTime.Now.ToUniversalTime();
+            await _userRepository.SaveUser(user);
+            //await UpdateDb(false, user);
 
         }
 
-
+        private static string CalculateMD5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
+            }
+        }
     }
 }

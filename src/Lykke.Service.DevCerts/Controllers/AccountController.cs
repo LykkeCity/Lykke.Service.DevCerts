@@ -54,9 +54,7 @@ namespace Lykke.Service.DevCerts.Controllers
             ViewData["ReturnUrl"] = returnUrl;
 
             return View(new SignInModel { GoogleApiClientId = ApiClientId });
-        }
-
-       
+        }       
 
         [AllowAnonymous]
         [HttpGet]
@@ -91,7 +89,7 @@ namespace Lykke.Service.DevCerts.Controllers
                 var user = await _userRepository.GetUserByUserEmail(webSignature.Email);
                 if (user == null)
                 {
-                    user = new UserEntity() { Email = webSignature.Email, Admin = false };
+                    user = new UserEntity() { Email = webSignature.Email, Admin = false, Visible = true };
                     await _userRepository.SaveUser(user);
                 }
 

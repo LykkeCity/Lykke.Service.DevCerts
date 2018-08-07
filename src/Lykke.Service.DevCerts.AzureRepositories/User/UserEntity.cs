@@ -14,6 +14,8 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
         public DateTime? RevokeDate { get; set; }
         public bool? HasCert { get; set; }
         public bool? Admin { get; set; }
+        public bool? Visible { get; set; }
+        public string CertMD5 { get; set; }
         public bool? CertIsRevoked { get; set; }
 
         public static string GeneratePartitionKey() => "U";
@@ -32,6 +34,11 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
                 CertPassword = certPassword.StringValue;
             }
 
+            if (properties.TryGetValue("CertMD5", out var certMD5))
+            {
+                CertMD5 = certMD5.StringValue;
+            }
+
             if (properties.TryGetValue("CertDate", out var certDate))
             {
                 CertDate = certDate.DateTime;
@@ -40,6 +47,11 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
             if (properties.TryGetValue("RevokeDate", out var revokeDate))
             {
                 RevokeDate = revokeDate.DateTime;
+            }
+
+            if (properties.TryGetValue("Visible", out var visible))
+            {
+                Visible = visible.BooleanValue;
             }
 
             if (properties.TryGetValue("HasCert", out var hasCert))
@@ -66,10 +78,12 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
                 {"Email", new EntityProperty(Email)},
                 {"CertPassword", new EntityProperty(CertPassword)},
                 {"CertDate", new EntityProperty(CertDate)},
+                {"CertMD5", new EntityProperty(CertMD5)},
                 {"RevokeDate", new EntityProperty(RevokeDate)},
                 {"HasCert", new EntityProperty(HasCert)},
                 {"Admin", new EntityProperty(Admin)},
                 {"CertIsRevoked", new EntityProperty(CertIsRevoked)},
+                {"Visible", new EntityProperty(Visible)}
             };
 
             return dict;

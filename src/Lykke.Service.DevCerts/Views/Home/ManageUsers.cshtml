@@ -4,6 +4,10 @@
 @{
     ViewData["Title"] = "Manage Users";
 }
+<div class="myAlert-top alert alert-success">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <strong>Success!</strong> <span></span>
+</div>
 
 <div>
     <button type="button" class="btn btn-primary reparce pull-right" data-toggle="tooltip" data-placement="bottom" title="This process can take a few time">Reparce DB</button>
@@ -19,6 +23,23 @@
     {
 <script type="text/javascript">
     $(function () {
+
+        function myAlertTop(text) {
+            txt = document.createTextNode(text);
+            var span = $(".myAlert-top").children('span');
+            span.html('');
+            span.append(txt);
+
+            $(".myAlert-top").show();
+
+            setTimeout(function () {
+                //$(".custom-alert").alert('close'); <--- Do not use this
+
+                $(".myAlert-top").slideUp(500, function () {
+                    $(this).hide();
+                });
+            }, 5000);
+        }
 
         $('[data-toggle="tooltip"]').tooltip();
 
@@ -56,9 +77,7 @@
                     $temp.val(text).select();
                     document.execCommand("copy");
                     $temp.remove();
-                    $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
-                        $("#success-alert").slideUp(500);
-                    });
+                    myAlertTop('Password copied.');
                 }
 
 
@@ -90,11 +109,13 @@
                             var url = 'RevokeCert/' + elemId;
 
                             $.post(url, elemId, function (data) {                                
-                                window.alert('Certificate revoked.');
                                 $.generateTable(data.Json);
+                                myAlertTop('Certificate revoked.');
+                                $btn.removeClass('disabled');
                             });
                         }
-                        $btn.removeClass('disabled');
+                        else
+                            $btn.removeClass('disabled');
                     }
                 });
 
@@ -108,11 +129,13 @@
                             var url = 'ChangePass/' + elemId;
 
                             $.post(url, elemId, function (data) {                                
-                                window.alert('Password changed.');
                                 $.generateTable(data.Json);
+                                myAlertTop('Password changed.');
+                                $btn.removeClass('disabled');
                             });
                         }
-                        $btn.removeClass('disabled');
+                        else
+                            $btn.removeClass('disabled');
                     }
                 });
 
@@ -125,11 +148,13 @@
                         if (confirm('New certificate will be generated.')) {
                             var url = 'GenerateNew/' + elemId;
                             $.post(url, elemId, function (data) {                                
-                                window.alert('New certificate was generated.');
                                 $.generateTable(data.Json);
+                                myAlertTop('New certificate was generated.');
+                                $btn.removeClass('disabled');
                             });
                         }
-                        $btn.removeClass('disabled');
+                        else
+                            $btn.removeClass('disabled');
                     }
                 });
             }
@@ -144,11 +169,13 @@
                     var url = 'Reparse';
 
                     $.post(url, elemId, function (data) {                        
-                        window.alert('DB was updated.');
                         $.generateTable(data.Json);
+                        myAlertTop('DB was updated.');
+                        $btn.removeClass('disabled');
                     });
                 }
-                $btn.removeClass('disabled');
+                else
+                    $btn.removeClass('disabled');
             }
             });
 
