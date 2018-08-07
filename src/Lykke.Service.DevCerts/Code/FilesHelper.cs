@@ -57,6 +57,7 @@ namespace Lykke.Service.DevCerts.Code
                     var NowMD5Hash = CalculateMD5(filePath);
                     if (LastMD5Hash != NowMD5Hash)
                     {
+                        Console.WriteLine("Starting reparce..." + DateTime.Now.ToLongTimeString());
                         var devFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"../" + "ccd_dev");
                         var testFolder = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, @"../" + "ccd_test");
 
@@ -184,7 +185,7 @@ namespace Lykke.Service.DevCerts.Code
                                         user.TestMD5 = CalculateMD5(path);
                                 }
 
-                                if(userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue &&  user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
+                                if(userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertPassword != userInCloud.CertPassword || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue &&  user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
                                 {
 
                                     await _userRepository.SaveUser(user);
@@ -215,7 +216,7 @@ namespace Lykke.Service.DevCerts.Code
 
                             //await _userRepository.SaveUser(userToSave);
                         }
-                        
+                        Console.WriteLine("Finished reparce..." + DateTime.Now.ToLongTimeString());
                         LastMD5Hash = NowMD5Hash;
                     }
                         
@@ -299,7 +300,8 @@ namespace Lykke.Service.DevCerts.Code
                 pass = "No password file.";
             }
 
-
+            if (pass == "No password file.")
+                Console.WriteLine($"No password file for {creds}.");
             return pass.Substring(0, pass.Length - 1);
         }
 
