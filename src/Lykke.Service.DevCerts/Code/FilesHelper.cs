@@ -146,8 +146,17 @@ namespace Lykke.Service.DevCerts.Code
                                     creds = user.Email;
                                 }
                                     
-                                var userInCloud = usersInCloud.Where(u => u.Email.Contains('@') ? u.Email.Substring(0, u.Email.IndexOf('@')) == creds : u.Email == creds).FirstOrDefault();
-                                
+                                var users = usersInCloud.Where(u => u.Email.Contains('@') ? u.Email.Substring(0, u.Email.IndexOf('@')) == creds : u.Email == creds);
+
+                                IUserEntity userInCloud = null;
+
+                                if (users != null)
+                                    userInCloud = users.FirstOrDefault();
+
+                                if (userInCloud != null)
+                                {
+                                    user.CertMD5 = userInCloud.CertMD5;
+                                }
 
                                 if (userInCloud != null)
                                 {
