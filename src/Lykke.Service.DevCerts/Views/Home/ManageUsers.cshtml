@@ -89,12 +89,12 @@
                         if (confirm('Certificate will be revoked.')) {
                             var url = 'RevokeCert/' + elemId;
 
-                            $.post(url, elemId, function (data) {
-                                $btn.removeClass('disabled');
+                            $.post(url, elemId, function (data) {                                
                                 window.alert('Certificate revoked.');
                                 $.generateTable(data.Json);
                             });
                         }
+                        $btn.removeClass('disabled');
                     }
                 });
 
@@ -107,12 +107,12 @@
                         if (confirm('Password will be changed.')) {
                             var url = 'ChangePass/' + elemId;
 
-                            $.post(url, elemId, function (data) {
-                                $btn.removeClass('disabled');
+                            $.post(url, elemId, function (data) {                                
                                 window.alert('Password changed.');
                                 $.generateTable(data.Json);
                             });
                         }
+                        $btn.removeClass('disabled');
                     }
                 });
 
@@ -124,13 +124,12 @@
 
                         if (confirm('New certificate will be generated.')) {
                             var url = 'GenerateNew/' + elemId;
-
-                            $.post(url, elemId, function (data) {
-                                $btn.removeClass('disabled');
+                            $.post(url, elemId, function (data) {                                
                                 window.alert('New certificate was generated.');
                                 $.generateTable(data.Json);
                             });
                         }
+                        $btn.removeClass('disabled');
                     }
                 });
             }
@@ -144,12 +143,12 @@
                 if (confirm('Do you whant to reparse database? This process can take a few time.')) {
                     var url = 'Reparse';
 
-                    $.post(url, elemId, function (data) {
-                        $btn.removeClass('disabled');
+                    $.post(url, elemId, function (data) {                        
                         window.alert('DB was updated.');
                         $.generateTable(data.Json);
                     });
                 }
+                $btn.removeClass('disabled');
             }
             });
 
