@@ -227,6 +227,8 @@ namespace Lykke.Service.DevCerts.Code
             {
                 pass = "No password file.";
             }
+            if (pass == "No password file.")
+                Console.WriteLine($"No password file for {creds}.");
 
             return pass.Substring(0, pass.Length - 1);
         }
