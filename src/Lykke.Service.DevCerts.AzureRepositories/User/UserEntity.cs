@@ -10,6 +10,9 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
     {
         public string Email { get; set ; }
         public string CertPassword { get; set; }
+        public string CertMD5 { get; set; }
+        public string DevMD5 { get; set; }
+        public string TestMD5 { get; set; }
         public DateTime? CertDate { get; set; }
         public DateTime? RevokeDate { get; set; }
         public bool? HasCert { get; set; }
@@ -33,6 +36,21 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
             if (properties.TryGetValue("CertPassword", out var certPassword))
             {
                 CertPassword = certPassword.StringValue;
+            }
+
+            if (properties.TryGetValue("CertMD5", out var certMD5))
+            {
+                CertMD5 = certMD5.StringValue;
+            }
+
+            if (properties.TryGetValue("DevMD5", out var devMD5))
+            {
+                DevMD5 = devMD5.StringValue;
+            }
+
+            if (properties.TryGetValue("TestMD5", out var testMD5))
+            {
+                TestMD5 = testMD5.StringValue;
             }
 
             if (properties.TryGetValue("CertDate", out var certDate))
@@ -85,6 +103,9 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
                 {"CertPassword", new EntityProperty(CertPassword)},
                 {"CertDate", new EntityProperty(CertDate)},
                 {"RevokeDate", new EntityProperty(RevokeDate)},
+                {"CertMD5", new EntityProperty(CertMD5)},
+                {"DevMD5", new EntityProperty(DevMD5)},
+                {"TestMD5", new EntityProperty(TestMD5)},
                 {"HasCert", new EntityProperty(HasCert)},
                 {"Admin", new EntityProperty(Admin)},
                 {"DevAccess", new EntityProperty(DevAccess)},

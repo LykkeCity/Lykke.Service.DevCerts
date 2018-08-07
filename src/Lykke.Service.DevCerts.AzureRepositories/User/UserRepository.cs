@@ -24,7 +24,7 @@ namespace Lykke.Service.DevCerts.AzureRepositories.User
                 creds = userEmail.Substring(0, userEmail.IndexOf('@'));
             else
                 creds = userEmail;
-            return Users.Where(u => u.Email.Contains(creds)).OrderByDescending(u => u.CertDate).FirstOrDefault();
+            return Users.Where(u => u.Email.Contains('@') ? u.Email.Substring(0, u.Email.IndexOf('@')) == creds : u.Email == creds).OrderByDescending(u => u.CertDate).FirstOrDefault();
         }
 
         public async Task<IUserEntity> GetUserByRowKey(string RowKey)

@@ -4,6 +4,10 @@
 @{
     ViewData["Title"] = "Manage Users";
 }
+<div class="myAlert-top alert alert-success">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <strong>Success!</strong> <span></span>
+</div>
 
 <div>
     <button type="button" class="btn btn-primary reparce pull-right" data-toggle="tooltip" data-placement="bottom" title="This process can take a few time">Reparce DB</button>
@@ -12,13 +16,28 @@
 <br />
 <br />
 <div class="editItems">
-
 </div>
-
 @section Scripts
     {
 <script type="text/javascript">
     $(function () {
+
+            function myAlertTop(text) {
+                txt = document.createTextNode(text);
+                var span = $(".myAlert-top").children('span');
+                span.html('');
+                span.append(txt);
+
+                $(".myAlert-top").show();
+
+                setTimeout(function () {
+                    //$(".custom-alert").alert('close'); <--- Do not use this
+
+                    $(".myAlert-top").slideUp(500, function () {
+                        $(this).hide();
+                    });
+                }, 5000);
+            }
 
         $('[data-toggle="tooltip"]').tooltip();
 
@@ -67,9 +86,7 @@
                     $temp.val(text).select();
                     document.execCommand("copy");
                     $temp.remove();
-                    $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
-                        $("#success-alert").slideUp(500);
-                    });
+                    myAlertTop('Password copied.');
                 }
 
 
@@ -114,12 +131,14 @@
                         if (confirm('Certificate will be revoked.')) {
                             var url = 'RevokeCert/' + elemId;
 
-                            $.post(url, elemId, function (data) {                                
+                            $.post(url, elemId, function (data) {
                                 $.generateTable(data.Json);
-                                window.alert('Certificate revoked.');
+                                myAlertTop('Certificate revoked.');
+                                $btn.removeClass('disabled');
                             });
                         }
-                        $btn.removeClass('disabled');
+                        else
+                            $btn.removeClass('disabled');
                     }
                 });
 
@@ -139,12 +158,14 @@
                         if (confirm('Access will be changed.')) {
                             var url = 'GraintAccess/' + elemId + '/' + $isDiv;
 
-                            $.post(url, elemId, function (data) {                                
+                            $.post(url, elemId, function (data) {
                                 $.generateTable(data.Json);
-                                window.alert('Access changed.');
+                                myAlertTop('Access changed.');
+                                $btn.removeClass('disabled');
                             });
                         }
-                        $btn.removeClass('disabled');
+                        else
+                            $btn.removeClass('disabled');
                     }
                 });
 
@@ -157,12 +178,14 @@
                         if (confirm('Password will be changed.')) {
                             var url = 'ChangePass/' + elemId;
 
-                            $.post(url, elemId, function (data) {                                
+                            $.post(url, elemId, function (data) {
                                 $.generateTable(data.Json);
-                                window.alert('Password changed.');
+                                myAlertTop('Password changed.');
+                                $btn.removeClass('disabled');
                             });
                         }
-                        $btn.removeClass('disabled');
+                        else
+                            $btn.removeClass('disabled');
                     }
                 });
 
@@ -175,12 +198,14 @@
                         if (confirm('New certificate will be generated.')) {
                             var url = 'GenerateNew/' + elemId;
 
-                            $.post(url, elemId, function (data) {                                
+                            $.post(url, elemId, function (data) {
                                 $.generateTable(data.Json);
-                                window.alert('New certificate was generated.');
+                                myAlertTop('New certificate was generated.');
+                                $btn.removeClass('disabled');
                             });
                         }
-                        $btn.removeClass('disabled');
+                        else
+                            $btn.removeClass('disabled');;
                     }
                 });
             }
@@ -194,12 +219,14 @@
                 if (confirm('Do you whant to reparse database? This process can take a few time.')) {
                     var url = 'Reparse';
 
-                    $.post(url, elemId, function (data) {                        
+                    $.post(url, elemId, function (data) {
                         $.generateTable(data.Json);
-                        window.alert('DB was updated.');
+                        myAlertTop('DB was updated.');
+                         $btn.removeClass('disabled');
                     });
                 }
-                $btn.removeClass('disabled');
+                else
+                    $btn.removeClass('disabled');
             }
             });
 

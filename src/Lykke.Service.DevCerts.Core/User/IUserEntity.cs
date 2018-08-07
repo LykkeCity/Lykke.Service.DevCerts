@@ -5,6 +5,9 @@ namespace Lykke.Service.DevCerts.Core.User
     public interface IUserEntity : IEntity
     {
         string Email { get; set; }
+        string CertMD5 { get; set; }
+        string DevMD5 { get; set; }
+        string TestMD5 { get; set; }
         bool? HasCert { get; set; }
         bool? Admin { get; set; }
         bool? Visible { get; set; }

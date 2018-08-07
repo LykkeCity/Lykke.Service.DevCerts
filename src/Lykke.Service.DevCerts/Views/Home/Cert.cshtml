@@ -7,6 +7,11 @@
 <div class="row">
     @if (!Model.CertIsRevoked)
     {
+
+        <div class="myAlert-top alert alert-success">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> <span></span>
+        </div>
         <div class="col-md-12">
 
             <div class="col-md-6">
@@ -67,9 +72,25 @@
 
 @section Scripts
     {
-    <script type="text/javascript">
+<script type="text/javascript">
         $(function () {
-           
+
+
+            function myAlertTop(text) {
+                txt = document.createTextNode(text);
+                var span = $(".myAlert-top").children('span');
+                span.append(txt);
+
+                $(".myAlert-top").show();                
+                
+                setTimeout(function () {
+                    //$(".custom-alert").alert('close'); <--- Do not use this
+
+                    $(".myAlert-top").slideUp(500, function () {
+                        $(this).hide();
+                    });
+                }, 5000);
+            }
 
             $('.copy').click(function () {
                 var value = document.getElementById('pwd').value;
@@ -120,17 +141,18 @@
                     if (confirm('Password will be changed.')) {
                         var url = '@this.Url.Action("ChangePassForUser", "Home", new { rowKey = Model.RowKey })';
                         console.log(url);
-                        $.post(url, elemId, function (data) {                            
-                            window.alert('Password changed. Please download updated certificate also.');
+                        $.post(url, elemId, function (data) {
+                            myAlertTop('Password changed. Please download updated certificate also.');
                             var pass = eval('( ' + data.Json + ')');
                             var pwd = document.getElementsByClassName('pwd');
                             $(pwd).attr('value', pass);
-
+                            $btn.removeClass('disabled');
                         });
                     }
-                    $btn.removeClass('disabled');
+                    else
+                        $btn.removeClass('disabled');
                 }
             });
         });
-    </script>
+</script>
 }
