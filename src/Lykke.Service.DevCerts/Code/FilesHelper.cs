@@ -164,9 +164,15 @@ namespace Lykke.Service.DevCerts.Code
 
                                 if (!(bool)user.CertIsRevoked)
                                 {
-                                    user.CertMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12"));
-                                    user.DevMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-dev.ovpn"));
-                                    user.TestMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-test.ovpn"));
+                                    var path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+                                    if(File.Exists(path))
+                                        user.CertMD5 = CalculateMD5(path);
+                                    path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-dev.ovpn");
+                                    if (File.Exists(path))
+                                        user.DevMD5 = CalculateMD5(path);
+                                    path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-test.ovpn");
+                                    if (File.Exists(path))
+                                        user.TestMD5 = CalculateMD5(path);
                                 }
 
                                 if(userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue &&  user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
@@ -227,13 +233,13 @@ namespace Lykke.Service.DevCerts.Code
                 {
                     
                     var filePath = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + extention);
-
-                    var fileMd5 = CalculateMD5(filePath);
-                    if (fileMd5 == user.CertMD5 && fileMd5 == user.CertMD5 && fileMd5 == user.CertMD5)
-                        return;
-                    byte[] file;
                     if (File.Exists(filePath))
                     {
+                        var fileMd5 = CalculateMD5(filePath);
+                        if (fileMd5 == user.CertMD5 && fileMd5 == user.DevMD5 && fileMd5 == user.TestMD5)
+                            return;
+                        byte[] file;
+                    
                         using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                         {
                             using (var reader = new BinaryReader(stream))
@@ -312,9 +318,15 @@ namespace Lykke.Service.DevCerts.Code
 
             await UpoadCertToBlob(user, userName, ip);
 
-            user.CertMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12"));
-            user.DevMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-dev.ovpn"));
-            user.TestMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-test.ovpn"));
+            var path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+            if (File.Exists(path))
+                user.CertMD5 = CalculateMD5(path);
+            path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-dev.ovpn");
+            if (File.Exists(path))
+                user.DevMD5 = CalculateMD5(path);
+            path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-test.ovpn");
+            if (File.Exists(path))
+                user.TestMD5 = CalculateMD5(path);
 
             await _userRepository.SaveUser(user);
 
@@ -390,9 +402,15 @@ namespace Lykke.Service.DevCerts.Code
             user.DevAccess = false;
             await UpoadCertToBlob(user, userName, ip);
 
-            user.CertMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12"));
-            user.DevMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-dev.ovpn"));
-            user.TestMD5 = CalculateMD5(Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-test.ovpn"));
+            var path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+            if (File.Exists(path))
+                user.CertMD5 = CalculateMD5(path);
+            path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-dev.ovpn");
+            if (File.Exists(path))
+                user.DevMD5 = CalculateMD5(path);
+            path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + "-test.ovpn");
+            if (File.Exists(path))
+                user.TestMD5 = CalculateMD5(path);
 
             await _userRepository.SaveUser(user);
 
@@ -401,7 +419,6 @@ namespace Lykke.Service.DevCerts.Code
 
         public async Task RevokeUser(IUserEntity user, string userName, string ip)
         {
-            await _userRepository.SaveUser(user);
             string creds = "";
             if (user.Email.Contains('@'))
                 creds = user.Email.Substring(0, user.Email.IndexOf('@'));
