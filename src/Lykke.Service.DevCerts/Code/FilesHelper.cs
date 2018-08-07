@@ -125,30 +125,23 @@ namespace Lykke.Service.DevCerts.Code
                                 user.HasCert = true;
                                 user.CertPassword = Crypto.EncryptStringAES(GetCertPass(user.Email), _appSettings.DevCertsService.EncryptionPass);
 
-                                string creds = "";
-                                if (user.Email.Contains('@'))
-                                {
-                                    creds = user.Email.Substring(0, user.Email.IndexOf('@'));
-                                }
-                                else
-                                {
-                                    creds = user.Email;
-                                }
+                                var users = usersInCloud.Where(u => u.Email == user.Email);
 
-                                var userInCloud = usersInCloud.Where(u => u.Email.Contains('@') ? u.Email.Substring(0, u.Email.IndexOf('@')) == creds : u.Email == creds).FirstOrDefault();
+                                IUserEntity userInCloud = null;
 
+                                if(users != null)
+                                    userInCloud = users.FirstOrDefault();
 
                                 if (userInCloud != null)
                                 {
                                     user.CertMD5 = userInCloud.CertMD5;
-                                    user.Email = userInCloud.Email;
                                 }
 
                                 if (!(bool)user.CertIsRevoked && (userInCloud == null || force))
                                 {
                                     await UpoadCertToBlob(user, "Lykke.Service.DevCerts", "localhost");
                                 }
-                                var path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, creds + ".p12");
+                                var path = Path.Combine(_appSettings.DevCertsService.PathToScriptFolder, user.Email + ".p12");
                                 if (!(bool)user.CertIsRevoked && File.Exists(path))
                                 {
                                     user.CertMD5 = CalculateMD5(path);
@@ -156,7 +149,6 @@ namespace Lykke.Service.DevCerts.Code
 
                                 if (userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue && user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
                                 {
-
                                     await _userRepository.SaveUser(user);
                                 };
                             }
