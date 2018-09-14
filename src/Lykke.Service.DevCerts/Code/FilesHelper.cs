@@ -148,7 +148,7 @@ namespace Lykke.Service.DevCerts.Code
                                     user.CertMD5 = CalculateMD5(path);
                                 }
 
-                                if (userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue && user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
+                                if (userInCloud == null || user.CertIsRevoked != userInCloud.CertIsRevoked || user.CertPassword != userInCloud.CertPassword || user.CertDate.Value.ToUniversalTime() != userInCloud.CertDate.Value.ToUniversalTime() || (user.RevokeDate.HasValue && user.RevokeDate.Value.ToUniversalTime() != userInCloud.RevokeDate.Value.ToUniversalTime()))
                                 {
                                     await _userRepository.SaveUser(user);
                                 };
