@@ -7,7 +7,7 @@ using Lykke.Service.DevCerts.Settings;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
+
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,6 @@ namespace Lykke.Service.DevCerts.Controllers
         private string HomeUrl => Url.Action("Cert", "Home");
         private readonly AppSettings _appSettings;
         private readonly IUserRepository _userRepository;
-        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly IFilesHelper _filesHelper;
 
         private string ApiClientId { get; }
@@ -34,13 +33,11 @@ namespace Lykke.Service.DevCerts.Controllers
             AppSettings appSettings,
             IUserRepository userRepository,
             IFilesHelper filesHelper,
-            IUserActionHistoryRepository userActionHistoryRepository,
-            IHostingEnvironment hostingEnvironment
+            IUserActionHistoryRepository userActionHistoryRepository
             ) : base(userActionHistoryRepository)
         {
             _appSettings = appSettings;
             _userRepository = userRepository;
-            _hostingEnvironment = hostingEnvironment;
             _filesHelper = filesHelper;
 
             ApiClientId = _appSettings.DevCertsService.ApiClientId;
