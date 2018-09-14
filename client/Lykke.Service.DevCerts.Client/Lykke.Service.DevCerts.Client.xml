@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Lykke.Service.DevCerts.Client</name>
+    </assembly>
+    <members>
+        <member name="M:Lykke.Service.DevCerts.Client.AutofacExtension.RegisterDevCertsClient(Autofac.ContainerBuilder,Lykke.Service.DevCerts.Client.DevCertsServiceClientSettings,System.Func{Lykke.HttpClientGenerator.HttpClientGeneratorBuilder,Lykke.HttpClientGenerator.HttpClientGeneratorBuilder})">
+            <summary>
+            Registers <see cref="T:Lykke.Service.DevCerts.Client.IDevCertsClient"/> in Autofac container using <see cref="T:Lykke.Service.DevCerts.Client.DevCertsServiceClientSettings"/>.
+            </summary>
+            <param name="builder">Autofac container builder.</param>
+            <param name="settings">DevCerts client settings.</param>
+            <param name="builderConfigure">Optional <see cref="T:Lykke.HttpClientGenerator.HttpClientGeneratorBuilder"/> configure handler.</param>
+        </member>
+        <member name="T:Lykke.Service.DevCerts.Client.DevCertsServiceClientSettings">
+            <summary>
+            DevCerts client settings.
+            </summary>
+        </member>
+        <member name="P:Lykke.Service.DevCerts.Client.DevCertsServiceClientSettings.ServiceUrl">
+            <summary>Service url.</summary>
+        </member>
+        <member name="T:Lykke.Service.DevCerts.Client.IDevCertsClient">
+            <summary>
+            DevCerts client interface.
+            </summary>
+        </member>
+    </members>
+</doc>

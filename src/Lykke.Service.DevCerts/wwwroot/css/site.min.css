@@ -1,0 +1,52 @@
+body{padding-top:50px;padding-bottom:20px}.body-content{padding-left:15px;padding-right:15px}.carousel-caption p{font-size:20px;line-height:1.4}.carousel-inner .item img[src$=".svg"]{width:100%}#qrCode{margin:15px}@media screen and (max-width:767px){.carousel-caption{display:none}}
+.red {
+    background-color: firebrick;
+    color: azure;
+}
+
+    .red:hover {
+        background-color: lightcoral;
+        color: azure;
+    }
+
+
+.green {
+    background-color: forestgreen;
+    color: azure
+}
+
+    .green:hover {
+        background-color: lightgreen;
+        color: azure;
+    }
+.viewMode {
+    word-break: break-all;
+}
+
+.myAlert-top {
+    position: fixed;
+    top: 5px;
+    left: 2%;
+    width: 96%;
+    z-index: 1100;
+}
+
+.myAlert-bottom {
+    position: fixed;
+    bottom: 5px;
+    left: 2%;
+    width: 96%;
+}
+
+div.fullscreen {
+    position: absolute;
+    width: 100%;
+    height: 960px;
+    top: 0;
+    left: 0;
+    background-color: lightblue;
+}
+
+.alert {
+    display: none;
+}

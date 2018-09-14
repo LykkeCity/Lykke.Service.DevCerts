@@ -1,0 +1,60 @@
+﻿@using Lykke.Service.DevCerts.Models
+@model SignInModel
+
+@section Header
+    {
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="@Model.GoogleApiClientId">
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-fetch_basic_profile" content="false">
+}
+
+<div class="signInView col-md-12">
+    <h2>Sign in</h2>
+    <p>Use your Lykke account to Sign In.</p>
+    @if (true.Equals(ViewData["usersEmpty"]))
+    {
+    <h3 class="info">You don't have users to manage the settings</h3>
+    }
+    @using (Html.BeginForm())
+    {
+    <input type="hidden" id="returnUrl" value="@ViewData["returnUrl"]">
+    <br />
+    <div class="g-signin2 disabled" data-onsuccess="googleSignIn" data-theme="dark" data-prompt="select_account" id="g-button"></div>  
+    <div id="loader"><h4>Please wait...</h4></div>
+
+    }
+</div>
+
+
+
+
+@section Scripts
+    {
+    <script type="text/javascript">
+        $(function () {
+            $('#loader').hide();
+
+            
+
+        });
+        function googleSignIn(googleUser) {
+                $('#g-button').hide();
+                $('#loader').show();
+                var idToken = googleUser.getAuthResponse().id_token;
+                $.post('@Url.Action("Authenticate")',
+                    {
+                        googleSignInIdToken: idToken,
+                        returnUrl: $('#returnUrl').val()
+                    }, function(data) {
+                        if (data) {
+                            $('#g-button').show();
+                            $('#loader').hide();
+                            location.href = data;
+                        }
+                    });
+                var auth2 = gapi.auth2.getAuthInstance();
+                auth2.disconnect();
+            }
+    </script>
+}

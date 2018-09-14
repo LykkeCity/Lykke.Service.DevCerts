@@ -1,0 +1,158 @@
+﻿@using Lykke.Service.DevCerts.Models
+@model UserModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    @if (!Model.CertIsRevoked)
+    {
+
+        <div class="myAlert-top alert alert-success">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> <span></span>
+        </div>
+        <div class="col-md-12">
+
+            <div class="col-md-6">
+                <h2>Download certificate:</h2>
+                <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download">Download</button>
+                <br />
+                <br />
+                <h2>Download Dev VPN config:</h2>
+                <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download-dev">Download</button>
+                <br />
+                <br />                <br />
+                <h2>Download Test VPN config:</h2>
+                <button type="button" class="btn btn-primary" asp-page-handler="GetCert" id="download-test">Download</button>
+            </div>
+
+
+            <div class="col-md-6">
+                <h2>Your password</h2>
+                <div class="form-group has-feedback">
+                    <div id="wrapper">
+                        @if (Model.CertPassword != "No password file")
+                        {
+                            <div class="col-md-7 ">
+                                <div class="input-group">
+                                    <input type="password" value="@Model.CertPassword" class="form-control pwd" id="pwd" readonly>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default copy" type="button" data-toggle="tooltip" title="Copy password"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
+                                        <button class="btn btn-default reveal" type="button" data-toggle="tooltip" title="Show/hide password"><i class="glyphicon glyphicon-eye-open"></i></button>
+                                    </span>
+                                </div>
+                            </div>
+
+                        }
+                        else
+                        {
+                            <div class="col-md-8">
+                                <input type="text" value="@Model.CertPassword" class="form-control pwd" id="pwd" readonly>
+                            </div>
+                        }
+                        <div class="col-md-4"><button type="button" class="btn btn-primary change-pass" id="showPwd" data-toggle="modal">Generate new password</button></div>
+                        <br />
+                        <br />
+                        <h2>Instructions:</h2>
+                        <p><a href="https://lykkex.atlassian.net/wiki/spaces/MAINTAIN/pages/523436136/How+to+import+a+certificate+for+access+to+Web+resources">How to import a certificate for access to Web resources</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-6">
+            <h3>Your certificate is revoked. Please, ask in DevOps chat.</h3>
+        </div>
+    }
+
+</div>
+
+@section Scripts
+    {
+<script type="text/javascript">
+        $(function () {
+
+
+            function myAlertTop(text) {
+                txt = document.createTextNode(text);
+                var span = $(".myAlert-top").children('span');
+                span.append(txt);
+
+                $(".myAlert-top").show();                
+                
+                setTimeout(function () {
+                    //$(".custom-alert").alert('close'); <--- Do not use this
+
+                    $(".myAlert-top").slideUp(500, function () {
+                        $(this).hide();
+                    });
+                }, 5000);
+            }
+
+            $('.copy').click(function () {
+                var value = document.getElementById('pwd').value;
+                copyToClipboard(value);
+            });
+
+            function copyToClipboard(text) {
+                var $temp = $("<input>");
+                $("body").append($temp);
+                $temp.val(text).select();
+                document.execCommand("copy");
+                $temp.remove();
+            }
+
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $(".reveal").on('click', function () {
+                $(this).children('i').toggleClass('glyphicon-eye-close').toggleClass('glyphicon-eye-open');
+                var $pwd = $(this).parents('div').children('input');
+                if ($pwd.attr('type') === 'password') {
+                    $pwd.attr('type', 'text');
+                } else {
+                    $pwd.attr('type', 'password');
+                }
+            });
+
+            $('#download').click(function () {
+                var url = '@this.Url.Action("GetCert", "Home")' + '/ext.p12';
+                window.open(url, "_blank");
+            });
+
+            $('#download-dev').click(function () {
+                var url = '@this.Url.Action("GetCert", "Home")' + '/ext-dev.ovpn';
+                window.open(url, "_blank");
+            });
+
+            $('#download-test').click(function () {
+                var url = '@this.Url.Action("GetCert", "Home")' + '/ext-test.ovpn';
+                window.open(url, "_blank");
+            });
+
+
+            $('.change-pass').click(function () {
+                var $btn = $(this);
+                if (!$btn.hasClass('disabled')) {
+                    $btn.addClass('disabled');
+                    var elemId = '@Model.RowKey';
+                    if (confirm('Password will be changed.')) {
+                        var url = '@this.Url.Action("ChangePassForUser", "Home", new { rowKey = Model.RowKey })';
+                        console.log(url);
+                        $.post(url, elemId, function (data) {
+                            myAlertTop('Password changed. Please download updated certificate also.');
+                            var pass = eval('( ' + data.Json + ')');
+                            var pwd = document.getElementsByClassName('pwd');
+                            $(pwd).attr('value', pass);
+                            $btn.removeClass('disabled');
+                        });
+                    }
+                    else
+                        $btn.removeClass('disabled');
+                }
+            });
+        });
+</script>
+}
